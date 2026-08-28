@@ -1,0 +1,1297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="theme-color" content="#081a32">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UK Atlas">
+<link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Life%20in%20the%20UK%20Knowledge%20Atlas%22%2C%22short_name%22%3A%22UK%20Atlas%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23081a32%22%2C%22theme_color%22%3A%22%23081a32%22%2C%22description%22%3A%22Offline%20Life%20in%20the%20UK%20study%20atlas%20with%20mocks%2C%20SRS%20and%20progress%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520112%2520112'%253E%253Crect%2520width%3D'112'%2520height%3D'112'%2520rx%3D'24'%2520fill%3D'%23081a32'%2F%253E%253Ctext%2520x%3D'56'%2520y%3D'68'%2520text-anchor%3D'middle'%2520font-size%3D'48'%2520fill%3D'%23ffd45f'%253E%25F0%259F%2597%25BA%25EF%25B8%258F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22112x112%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
+<title>Life in the UK Knowledge Atlas v11</title>
+<script>
+(function(){
+  const memoryStorage={
+    _data:Object.create(null),
+    getItem(key){return Object.prototype.hasOwnProperty.call(this._data,key)?this._data[key]:null},
+    setItem(key,value){this._data[key]=String(value)},
+    removeItem(key){delete this._data[key]},
+    clear(){this._data=Object.create(null)},
+    key(index){return Object.keys(this._data)[index]??null},
+    get length(){return Object.keys(this._data).length}
+  };
+  let storage=memoryStorage;
+  try{
+    const candidate=window.localStorage;
+    const testKey='__atlas_storage_test__';
+    candidate.setItem(testKey,'1');
+    candidate.removeItem(testKey);
+    storage=candidate;
+  }catch(error){storage=memoryStorage}
+  Object.defineProperty(window,'safeStorage',{value:storage,writable:false,configurable:false});
+  window.AtlasApp=window.AtlasApp||{};
+  window.AtlasApp.renderDashboard=function(){};
+})();
+</script>
+<style>
+:root{--navy:#0c2340;--blue:#1261a0;--sky:#dceeff;--gold:#f4b942;--ink:#14253a;--muted:#64748b;--paper:#f4f7fb;--card:#fff;--green:#188977;--red:#bd3d4f}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(140deg,#edf5ff,#f8fafc 48%,#edf9f5);font:15px/1.48 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+header{padding:28px clamp(18px,5vw,70px);background:linear-gradient(120deg,#081a32,#173f6d);color:#fff}
+h1{margin:0;font-size:clamp(26px,4.5vw,48px);line-height:1.1}
+.sub{max-width:1100px;color:#d7e7fb;margin-top:8px}
+.wrap{max-width:1400px;margin:auto;padding:20px}
+.card{background:#fff;border:1px solid #dfe8f2;border-radius:18px;padding:18px;box-shadow:0 8px 30px #17324f12;margin:16px 0}
+.journey{display:grid;grid-template-columns:minmax(360px,1.05fr) minmax(340px,.95fr);gap:16px}
+.map{width:100%;height:auto;background:#dff2ff;border-radius:16px}
+.land{fill:#d5e8cc;stroke:#527060;stroke-width:2}.ireland{fill:#f0e5ba}
+.capital{fill:#bd3d4f;stroke:#fff;stroke-width:2}
+.capital-label{font-size:12px;font-weight:800;paint-order:stroke;stroke:#fff;stroke-width:3}
+.event{min-height:480px}.event.swap{animation:swap .28s ease}
+@keyframes swap{from{opacity:.35;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{color:var(--blue);font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+.year{display:inline-block;background:var(--navy);color:#fff;padding:6px 10px;border-radius:999px;font-weight:800}
+.artgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.artifact-card{background:#f7fafc;border:1px solid #e1e9f2;border-radius:12px;padding:10px}
+.nav{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.nav button,.btn{border:0;background:var(--navy);color:#fff;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
+.nav button:disabled{opacity:.35}
+.rail{position:relative;overflow-x:auto;padding:30px 4px 8px}
+.milestones{display:grid;grid-template-columns:repeat(40,115px);gap:0;min-width:max-content}
+.tick{position:relative;text-align:center;border-top:4px solid #9cbbda;padding:16px 5px 0;cursor:pointer;font-size:11px;color:#50647a}
+.tick:before{content:'';position:absolute;width:12px;height:12px;background:#fff;border:4px solid var(--blue);border-radius:50%;top:-10px;left:calc(50% - 10px)}
+.tick.on{color:var(--navy);font-weight:800}
+.tick.on:before{background:var(--gold);border-color:#8a6400;transform:scale(1.2)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{border:1px solid #bdd0e3;border-radius:999px;background:#f8fbff;padding:8px 12px;font-weight:750;cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+.atlasgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mini{background:#f7fafc;padding:13px;border-radius:13px}
+.stat{font-size:25px;font-weight:900;color:var(--blue)}
+.quizbox{background:#f8fbff;border-radius:14px;padding:15px}
+.opts{display:grid;gap:7px}
+.opt{border:1px solid #c9d7e5;background:#fff;color:var(--ink);text-align:left;padding:9px;border-radius:10px;cursor:pointer}
+.opt.good{background:#dff7ed;border-color:#188977}
+.opt.bad{background:#ffe7ea;border-color:#bd3d4f}
+.examgrid{display:grid;grid-template-columns:220px 1fr;gap:16px}
+.examlist button{display:block;width:100%;margin:6px 0;text-align:left}
+.score{font-size:22px;font-weight:900}
+.note{font-size:12px;color:#53677e}
+.special{background:linear-gradient(130deg,#fff4c2,#fff,#e1f5ef);border:2px solid #e2b32b}
+.hidden{display:none}
+.appnav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.appnav button{border:1px solid #365472;background:#10243e;color:#b9c9dc;padding:11px 17px;border-radius:999px;font-weight:800;cursor:pointer}
+.appnav button.on{background:#67a8ff;color:#071528;border-color:#67a8ff}
+.view{display:none}.view.on{display:block}
+.atlasHero{background:#12243d;color:#eaf2ff;border:1px solid #315070}
+.atlasHero p{color:#aec0d5}
+.atlasCards{display:grid;grid-template-columns:repeat(3,minmax(230px,1fr));gap:12px}
+.atlasCard{background:#172a45;color:#eef5ff;border:1px solid #395777;border-radius:15px;padding:16px;display:flex;flex-direction:column;min-height:265px}
+.atlasCard .date{color:#ffd45f;font-size:20px;font-weight:900}
+.atlasCard h3{margin:4px 0 8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.chip{background:#243f65;border-radius:999px;padding:5px 9px;color:#d9e7f8}
+.openPeriod{margin-top:10px;align-self:flex-start;border:1px solid #49698d;background:#1e3859;color:#fff;padding:8px 11px;border-radius:9px;cursor:pointer}
+.flashToolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.flashToolbar button{border:1px solid #bdd0e3;background:#f8fbff;border-radius:999px;padding:8px 12px;font-weight:800;cursor:pointer}
+.flashToolbar button.on{background:#0c2340;color:#fff}
+.flashGrid{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px}
+.flash{height:210px;perspective:900px;cursor:pointer}
+.flashInner{width:100%;height:100%;position:relative;transition:transform .45s;transform-style:preserve-3d}
+.flash.flipped .flashInner{transform:rotateY(180deg)}
+.flashFace{position:absolute;inset:0;backface-visibility:hidden;border-radius:15px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #355575;background:#172a45;color:#fff}
+.flashBack{transform:rotateY(180deg);background:#fff;color:#14253a}
+.flashIcon{font-size:46px}.flashCue{color:#ffd45f;font-weight:900;font-size:19px}.flashHint{font-size:12px;color:#aebfd3}
+.viewTitle{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.rapid{border:0;background:#f4b942;color:#10243e;padding:9px 13px;border-radius:10px;font-weight:900;cursor:pointer}
+.map-icon{font-size:27px;paint-order:stroke;stroke:#fff;stroke-width:3px;cursor:default}
+.map-icon-label{font-size:12px;font-weight:850;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.population-box{margin:14px 0;background:linear-gradient(120deg,#edf7ff,#f7fbff);border:1px solid #bfd9ee;border-radius:14px;padding:14px}
+.pop-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pop-stat{font-size:25px;font-weight:900;color:var(--blue)}
+.pop-bars{display:flex;align-items:end;gap:5px;height:76px;margin-top:10px}
+.pop-col{flex:1;min-width:18px;text-align:center}
+.pop-bar{background:linear-gradient(#67a8ff,#1261a0);border-radius:5px 5px 2px 2px;min-height:4px}
+.pop-col small{font-size:9px;color:#53677e}
+.feedback{margin-top:11px;padding:11px 12px;border-left:4px solid var(--blue);background:#eef6ff;border-radius:8px}
+.feedback.correct{border-color:var(--green);background:#e8f8f2}
+.feedback.incorrect{border-color:var(--red);background:#fff0f2}
+.nextQ{margin-top:12px}
+.wrong-review{display:grid;gap:10px;margin:14px 0}
+.wrong-item{border:1px solid #f0b8c0;background:#fff7f8;border-radius:12px;padding:12px}
+.wrong-item b{color:#8c2333}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric{background:#fff;border:1px solid #dce7f1;border-radius:15px;padding:16px}
+.metric .value{font-size:31px;font-weight:950;color:var(--blue)}
+.readiness-meter{height:17px;background:#e7eef5;border-radius:999px;overflow:hidden}
+.readiness-meter span{display:block;height:100%;background:linear-gradient(90deg,#bd3d4f,#f4b942 55%,#188977);border-radius:inherit}
+.topic-row{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;margin:8px 0}
+.topic-track{height:10px;background:#e4ecf3;border-radius:999px;overflow:hidden}
+.topic-track span{display:block;height:100%;background:#1261a0}
+.history-table{width:100%;border-collapse:collapse}
+.history-table th,.history-table td{text-align:left;border-bottom:1px solid #e4ebf2;padding:9px}
+.muted{color:var(--muted)}
+.danger{background:#8e2938!important}
+.question-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.review-banner{background:#fff4c2;border:1px solid #e2b32b;border-radius:12px;padding:10px;margin-bottom:12px}
+.demo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.demo-card{background:#fff;border:1px solid #dce7f1;border-radius:16px;padding:18px}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:160px;margin:16px 0}
+.bar-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.bar-fill{width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#67a8ff,#1261a0);min-height:4px;transition:height .4s}
+.bar-label{font-size:11px;margin-top:6px;text-align:center;color:#50647a}
+.bar-val{font-size:12px;font-weight:800;color:var(--navy)}
+.pie-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.pie-chip{padding:8px 12px;border-radius:10px;background:#f0f6fc;border:1px solid #c9d9ea;font-weight:700}
+.nation-bars .nb{display:grid;grid-template-columns:110px 1fr 70px;gap:10px;align-items:center;margin:8px 0}
+.nb-track{height:14px;background:#e4ecf3;border-radius:999px;overflow:hidden}
+.nb-track span{display:block;height:100%;border-radius:inherit}
+.extra-facts{display:grid;gap:8px;margin-top:12px}
+.extra-facts li{margin:0}
+.detail-block:empty{display:none}.detail-block{background:#f8fbff;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #d6e4f0}
+@media(max-width:1000px){.atlasCards{grid-template-columns:repeat(2,1fr)}.flashGrid{grid-template-columns:repeat(2,1fr)}.demo-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.journey,.examgrid{grid-template-columns:1fr}.atlasgrid{grid-template-columns:1fr}.artgrid{grid-template-columns:1fr}.dashboard-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.atlasCards,.flashGrid{grid-template-columns:1fr}.dashboard-grid{grid-template-columns:1fr}.topic-row{grid-template-columns:100px 1fr 48px}}
+
+/* v10: SRS, adaptive, timed, analytics */
+
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.badge{border-radius:14px;padding:12px;border:1px solid #dfe8f2;background:#f7fafc;text-align:center;opacity:.45;filter:grayscale(.8)}
+.badge.earned{opacity:1;filter:none;background:linear-gradient(160deg,#fff8e7,#eef9f0);border-color:#e2b32b}
+.badge .icon{font-size:1.6rem}
+.badge b{display:block;margin-top:4px;font-size:.9rem}
+.badge .note{font-size:.75rem}
+
+.srs-bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;align-items:center}
+.rating-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.rating-row button{flex:1;min-width:88px;padding:10px 8px;border-radius:12px;border:1px solid #c5d4e8;background:#f4f8fc;cursor:pointer;font-weight:600}
+.rating-row button:hover{filter:brightness(.97)}
+.rating-row .again{border-color:#e8a0a0;background:#fff0f0}
+.rating-row .hard{border-color:#e8c88a;background:#fff8eb}
+.rating-row .good{border-color:#9fd0a8;background:#eef9f0}
+.rating-row .easy{border-color:#8ab4e8;background:#eef5ff}
+.timer-bar{display:flex;align-items:center;gap:12px;background:#0f2744;color:#fff;padding:10px 14px;border-radius:12px;margin-bottom:12px}
+.timer-bar .clock{font-variant-numeric:tabular-nums;font-size:1.25rem;font-weight:700}
+.timer-bar.warn{background:#8b3a00}
+.timer-bar.crit{background:#7a1212}
+.mastery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.mastery-cell{border-radius:12px;padding:12px;border:1px solid #dfe8f2;text-align:center}
+.mastery-cell .pct{font-size:1.4rem;font-weight:700}
+.mastery-cell.low{background:#fff0f0;border-color:#f0c0c0}
+.mastery-cell.mid{background:#fff8eb;border-color:#f0d8a0}
+.mastery-cell.high{background:#eef9f0;border-color:#b0e0b8}
+.streak-pill{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(120deg,#ffd45f,#ffb347);color:#3a2a00;padding:6px 12px;border-radius:999px;font-weight:700;font-size:.95rem}
+.coverage-meter{height:12px;background:#e8eef6;border-radius:999px;overflow:hidden;margin:6px 0}
+.coverage-meter>span{display:block;height:100%;background:linear-gradient(90deg,#3a7bd5,#00d2ff);border-radius:999px}
+.mode-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.mode-tabs button{padding:10px 14px;border-radius:12px;border:1px solid #c5d4e8;background:#fff;cursor:pointer;font-weight:600}
+.mode-tabs button.on{background:#173f6d;color:#fff;border-color:#173f6d}
+.due-badge{background:#e74c3c;color:#fff;font-size:.75rem;padding:2px 7px;border-radius:999px;margin-left:6px}
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:12px 0}
+.stat-card{background:#f7fafc;border:1px solid #dfe8f2;border-radius:14px;padding:14px}
+.stat-card .n{font-size:1.6rem;font-weight:700;color:#173f6d}
+.exam-end-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>Life in the UK Knowledge Atlas <span style="font-size:.38em;vertical-align:top;color:#ffd45f">v11</span></h1>
+  <p class="sub">v11: SRS, adaptive Focus, timed exam, custom quizzes, badges, PWA install — Time Journey, UK Today (with demographics), flashcards and mocks. Offline single-file study aid. Single-file HTML — works offline with localStorage (or session memory in sandboxed previews).</p>
+</header>
+<main class="wrap">
+<nav class="appnav" aria-label="Atlas sections">
+  <button class="on" data-view="timeView">Time Journey</button>
+  <button data-view="atlasView">Knowledge Atlas</button>
+  <button data-view="flashView">Flashcards</button>
+  <button data-view="todayView">UK Today</button>
+  <button data-view="examView">Mock Exams</button>
+  <button data-view="customView">Custom Quiz</button>
+  <button data-view="focusView">Focus Practice</button>
+  <button data-view="srsView">SRS Review</button>
+  <button data-view="readyView">Personal Readiness</button>
+</nav>
+
+<section id="timeView" class="view on"></section>
+<section id="atlasView" class="view">
+  <div class="card atlasHero">
+    <h2>Artifacts, wars, monarchs and inventions</h2>
+    <p>Every tile links an object or event to the story you need to remember. Select <b>Open period</b> to jump to the exact milestone in Time Journey.</p>
+  </div>
+  <div id="atlasCards" class="atlasCards"></div>
+</section>
+<section id="flashView" class="view">
+  <div class="card">
+    <div class="viewTitle">
+      <div><h2>Flashcards</h2><p>Use the icon as the first memory cue. Click a card to reveal the answer.</p></div>
+      <button id="rapidBtn" class="rapid">⚡ Rapid Recall</button>
+    </div>
+    <div id="flashToolbar" class="flashToolbar"></div>
+    <div id="flashGrid" class="flashGrid"></div>
+  </div>
+</section>
+<section id="todayView" class="view"></section>
+<section id="examView" class="view"></section>
+<section id="customView" class="view">
+  <div class="card">
+    <div class="viewTitle"><div><h2>Custom Quiz Builder</h2><p>Choose topics and how many questions. Answers still support SRS ratings.</p></div></div>
+    <div id="customPanel"></div>
+  </div>
+</section>
+<section id="focusView" class="view">
+  <div class="card">
+    <div class="viewTitle"><div><h2>Focus Practice</h2><p>Adaptive 24-question sets weighted toward your weakest topics and recent mistakes. Rate each answer for spaced repetition.</p></div></div>
+    <div id="focusPanel"></div>
+  </div>
+</section>
+<section id="srsView" class="view">
+  <div class="card">
+    <div class="viewTitle"><div><h2>Spaced Repetition Review</h2><p>Due cards, new cards and learning queue (SM-2 style). Rate Again / Hard / Good / Easy after each reveal.</p></div></div>
+    <div id="srsPanel"></div>
+  </div>
+</section>
+<section id="readyView" class="view">
+  <div class="card">
+    <div class="viewTitle">
+      <div>
+        <h2>Personal Readiness Dashboard</h2>
+        <p>Progress uses browser localStorage when available and falls back to session memory in sandboxed previews. Download this HTML to keep progress on your machine.</p>
+      </div>
+      <button id="pwaInstallBtn" class="btn" style="display:none" onclick="AtlasApp.installPWA()">Install app</button>
+      <button id="resetProgress" class="btn danger">Reset progress</button>
+    </div>
+    <div id="readinessDashboard"></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="nav">
+    <button id="prev">← Back</button>
+    <div class="rail"><div id="ticks" class="milestones"></div></div>
+    <button id="next">Forward →</button>
+  </div>
+</section>
+
+<section class="journey">
+  <div class="card">
+    <h2>UK &amp; Ireland Time Map</h2>
+    <svg class="map" viewBox="0 0 620 700" role="img" aria-label="Geographic study map of Great Britain and Ireland with capitals">
+      <path class="land" d="M365 35l62 17 34 58-12 52 40 54-28 65 31 59-28 63 22 47-35 68-22 88-57 63-45-7-12-56 23-65-7-63 18-59-25-62 16-52-31-55 20-50-18-56 23-36z"/>
+      <path class="land" d="M290 405l-44 14-36 50 19 42 50-6 35-48z"/>
+      <path class="ireland" d="M139 232l76-25 55 34 8 65-40 49 13 65-41 56-73-9-36-56 14-57-29-52z"/>
+      <circle class="capital" cx="397" cy="500" r="7"/><text class="capital-label" x="408" y="504">London</text>
+      <circle class="capital" cx="398" cy="230" r="7"/><text class="capital-label" x="409" y="234">Edinburgh</text>
+      <circle class="capital" cx="277" cy="462" r="7"/><text class="capital-label" x="288" y="466">Cardiff</text>
+      <circle class="capital" cx="175" cy="328" r="7"/><text class="capital-label" x="186" y="332">Belfast</text>
+      <circle class="capital" cx="160" cy="402" r="7"/><text class="capital-label" x="171" y="406">Dublin</text>
+      <g id="mapArtifacts"></g>
+    </svg>
+    <p class="note">Geographic study silhouette, including the independent Republic of Ireland for historical context. Capitals are pictured as labelled points.</p>
+  </div>
+  <div id="event" class="card event">
+    <span id="era" class="eyebrow"></span>
+    <h2 id="title"></h2>
+    <span id="date" class="year"></span>
+    <p id="desc"></p>
+    <div id="extraDetail" class="detail-block"></div>
+    <h3>Memory anchors</h3>
+    <div id="artifacts" class="artgrid"></div>
+    <div id="populationBox" class="population-box"></div>
+    <div class="quizbox">
+      <div class="eyebrow">Period quiz</div>
+      <p id="pq"></p>
+      <div id="popts" class="opts"></div>
+      <p id="pfeedback"></p>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>UK Today, connected to the journey</h2>
+  <div class="tabs" id="tabs">
+    <button class="on" data-id="identity">Identity</button>
+    <button data-id="government">Parliaments</button>
+    <button data-id="ireland">Ireland</button>
+    <button data-id="society">Demography &amp; religion</button>
+    <button data-id="culture">Culture &amp; awards</button>
+    <button data-id="science">Inventions</button>
+    <button data-id="sport">Sport &amp; ages</button>
+    <button data-id="world">World role</button>
+  </div>
+  <div id="identity" class="atlasgrid panel">
+    <div class="mini"><b>United Kingdom</b><p>England, Scotland, Wales and Northern Ireland. Great Britain means England, Scotland and Wales.</p></div>
+    <div class="mini"><b>Four capitals</b><p>London, Edinburgh, Cardiff and Belfast. Dublin is the capital of the independent Republic of Ireland.</p></div>
+    <div class="mini"><b>Identity and values</b><p>Democracy, rule of law, individual liberty, tolerance of different faiths and beliefs, and participation in community life.</p></div>
+  </div>
+  <div id="government" class="atlasgrid panel hidden">
+    <div class="mini"><b>UK Parliament</b><div class="stat">650 MPs</div><p>Commons and Lords at Westminster. The Speaker chairs Commons debates, is neutral, maintains order and is chosen by MPs in a secret ballot.</p></div>
+    <div class="mini"><b>Scottish Parliament</b><div class="stat">129 MSPs</div><p>Meets at Holyrood in Edinburgh. Substantial devolved powers (handbook).</p></div>
+    <div class="mini"><b>Northern Ireland Assembly</b><div class="stat">90 MLAs</div><p>Meets at Stormont in Belfast. Modern story tied to the 1998 Good Friday Agreement.</p></div>
+    <div class="mini"><b>Senedd / Welsh Assembly</b><div class="stat">60 (handbook)</div><p>The study source uses the historic 60-member figure and older “Welsh Assembly” terminology. Verify current arrangements against official Senedd information.</p></div>
+    <div class="mini"><b>Big Ben</b><p>Memory distinction: Big Ben is the great bell, not the whole Palace of Westminster (Elizabeth Tower).</p></div>
+    <div class="mini"><b>Voting evolution</b><p>1832 and 1867 reforms expanded representation; suffragettes campaigned for women’s votes; equal voting age at 21 in 1928; voting age became 18 in 1969.</p></div>
+  </div>
+  <div id="ireland" class="atlasgrid panel hidden">
+    <div class="mini"><b>Before partition</b><p>Ireland had a complex relationship with English and later UK rule. Plantations in Ulster had lasting consequences.</p></div>
+    <div class="mini"><b>1921–22 partition</b><p>Six northern counties remained in the UK as Northern Ireland; the rest became the Irish Free State and a republic in 1949.</p></div>
+    <div class="mini"><b>Peace process</b><p>The 1998 Good Friday Agreement underpins the modern Northern Ireland settlement and devolution story.</p></div>
+  </div>
+  <div id="society" class="atlasgrid panel hidden">
+    <div class="mini"><b>Population table</b><div class="stat">67.6m (2022 est.)</div><p>Handbook series from just over 4m (1600) to estimated 67.6m (2022). England ~84%.</p></div>
+    <div class="mini"><b>Identity and diversity</b><p>Ethnically diverse population, especially in large cities; origins from across the world. Nearly 10% have a parent or grandparent born outside the UK.</p></div>
+    <div class="mini"><b>Religion (2009 survey)</b><p>Christian 70%, no religion 21%, Muslim 4%, Hindu 2%, Sikh 1%, Jewish &amp; Buddhist each under 0.5%, other 2%.</p></div>
+  </div>
+  <div id="culture" class="atlasgrid panel hidden">
+    <div class="mini"><b>Prizes</b><p>Mercury Prize, BRIT Awards, BAFTA, Olivier, Turner Prize, Booker.</p></div>
+    <div class="mini"><b>Honours</b><p>Victoria Cross for acts of valour. Nobel laureates in the study story include Fleming, Crick and Kipling.</p></div>
+    <div class="mini"><b>Landmarks</b><p>Stonehenge, Skara Brae, castles, cathedrals, Westminster and the Cenotaph link places to periods.</p></div>
+  </div>
+  <div id="science" class="atlasgrid panel hidden">
+    <div class="mini"><b>Transport</b><p>Steam power, railways, Brunel engineering, jet engine, hovercraft, Harrier and Concorde.</p></div>
+    <div class="mini"><b>Information</b><p>Television, radar, Turing machine, ATM and World Wide Web.</p></div>
+    <div class="mini"><b>Medicine and atomic science</b><p>Penicillin, insulin, DNA research, IVF, MRI and cloning. Rutherford’s atom research is linked in the handbook to later wartime atomic work.</p></div>
+  </div>
+  <div id="sport" class="atlasgrid panel hidden">
+    <div class="mini"><b>Golf and tennis</b><p>St Andrews is known as the home of golf; Wimbledon is the famous London tennis championship.</p></div>
+    <div class="mini"><b>Olympic anchors</b><p>Sir Steve Redgrave won rowing gold at five consecutive Games; Mary Peters won pentathlon gold in 1972 (strongly associated with Northern Ireland sport).</p></div>
+    <div class="mini"><b>Minimum ages (study source)</b><p>16: moped and beer/wine with a meal when accompanied by someone 18+. 17: car/motorcycle. 18: buy alcohol, vote, stand for public office, jury service and listed adult activities.</p></div>
+  </div>
+  <div id="world" class="atlasgrid panel hidden">
+    <div class="mini"><b>Commonwealth</b><p>Developed as former colonies became independent. It has no power over members but can suspend membership.</p></div>
+    <div class="mini"><b>NATO</b><p>The UK joined the post-war North Atlantic alliance.</p></div>
+    <div class="mini"><b>Europe and Brexit</b><p>The UK joined the EEC in 1973, held an EU referendum in 2016, and formally left the EU on 31 January 2020.</p></div>
+  </div>
+</section>
+
+
+<section class="card" id="todayDemographics">
+  <h2>UK Today · Demographics</h2>
+  <p class="note">Figures from <i>Life in the UK: A guide for new residents, 3rd edition</i> (population table, 2009 Citizenship Survey, nation shares).</p>
+  <div class="demo-grid">
+    <div class="demo-card">
+      <h3>Population growth (handbook series)</h3>
+      <div class="bar-chart" id="popChart"></div>
+      <p class="note">1600 just over 4m → 1801 8m → 1901 40m → 1951 50m → 2010 just over 62m → 2022 estimated 67.6m. Recent growth linked to migration and longer life expectancy.</p>
+    </div>
+    <div class="demo-card">
+      <h3>Share by nation (handbook)</h3>
+      <div class="nation-bars" id="nationBars"></div>
+      <p class="note">England ~84%, Scotland just over 8%, Wales around 5%, Northern Ireland under 3%.</p>
+    </div>
+    <div class="demo-card">
+      <h3>Religion (2009 Citizenship Survey)</h3>
+      <div class="pie-row" id="religionChips"></div>
+      <p class="note">Christian 70%, no religion 21%, Muslim 4%, Hindu 2%, Sikh 1%, Jewish and Buddhist each under 0.5%, other 2%.</p>
+    </div>
+    <div class="demo-card">
+      <h3>Key facts</h3>
+      <ul class="extra-facts">
+        <li>Nearly 10% of the population has a parent or grandparent born outside the UK (handbook context).</li>
+        <li>English is the main language; Welsh, Gaelic and Irish Gaelic are also spoken in parts of the UK.</li>
+        <li>The UK is a constitutional monarchy with a parliamentary democracy.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>20 mocks + official timed exam</h2>
+  <p>Each quiz contains 24 multiple-choice questions. A pass is <b>18/24, or 75%</b>. Use <b>Official Timed Exam</b> for a 45‑minute simulation with no mid-question feedback. Rate answers with Again/Hard/Good/Easy to feed spaced repetition. Questions are drawn from an expanded, de-duplicated bank (handbook-verified, including cleaned OCR items) with seeded low-repetition selection. Every answer pauses for a book-aligned explanation; missed questions are collected for Rapid Recall.</p>
+  <div class="examgrid">
+    <div id="examlist" class="examlist"></div>
+    <div id="exam"><h3>Select a quiz</h3><p>Select a mock. Each answer reveals an explanation before you continue. Your score and mistake review appear at the end.</p></div>
+  </div>
+</section>
+
+<section class="card note">
+  <b>Source note.</b> Primary study grounding: <i>Life in the UK: A guide for new residents, 3rd edition</i>. Mock items from practice banks were included only after fact-checking against the handbook; OCR noise and mismatched answers were discarded or corrected. Some handbook wording and institutional figures are historical or edited; where a current figure was not independently verified, the atlas labels it as a handbook figure rather than presenting it as current. This is a study aid, not an official test service. Download this single HTML file to study offline; progress saves in localStorage when the browser allows it.
+</section>
+</main>
+
+<script>
+/* ===== Data: expanded milestones (Time Journey) ===== */
+const ICONS=["🪨","🌾","🗿","⚔️","🏛️","🔥","🧱","🛡️","✝️","🚢","🏰","📜","⚔️","☠️","🏹","🌹","⛪","⛵","⚔️","👑","🇬🇧","⚙️","🏴","👑","🗳️","🌺","🍀","✈️","🏥","🇪🇺","🗳️","📻","🔬","🏝️","👩‍💼","🕊️","💻","📊","🏆","🌍"];
+const M=[
+{year:"c.10,000 years ago",era:"Prehistory",title:"Britain becomes an island",desc:"Rising sea levels after the last Ice Age permanently separated Britain from continental Europe.",extra:"Stone Age hunter-gatherers followed herds. Britain was joined to the continent by a land bridge until rising seas separated it about 10,000 years ago.",art:["Land bridge","Flint tools","Hunter-gatherer camp"],place:"Britain",q:["Who were the first people in Stone Age Britain?",["Hunter-gatherers","Romans","Normans","Vikings"],0]},
+{year:"c.4000 BC",era:"Prehistory",title:"First farmers",desc:"Farming communities built houses, tombs and monuments. Agriculture arrived about 6,000 years ago.",extra:"The first farmers arrived about 6,000 years ago (ancestors likely from south-east Europe). They built houses, tombs and monuments.",art:["Stone axe","Roundhouse","Early fields"],place:"Britain",q:["What major change arrived about 6,000 years ago?",["Farming","Steam power","Printing","Railways"],0]},
+{year:"c.2500 BC",era:"Prehistory",title:"Stonehenge and Skara Brae",desc:"Stonehenge was a seasonal gathering place; Skara Brae preserves a late Stone Age village in Orkney.",extra:"Stonehenge (Wiltshire) was likely a seasonal ceremonial gathering place. Skara Brae (Orkney) is a well-preserved late Stone Age village. Bronze Age: roundhouses and round barrows. Iron Age: hill forts such as Maiden Castle (Dorset); first coins, some named after kings.",art:["Stonehenge","Skara Brae","Ceremonial stones"],place:"Wiltshire / Orkney",q:["Where is Stonehenge?",["Wiltshire","Belfast","York","Dublin"],0]},
+{year:"55 BC",era:"Roman Britain",title:"Julius Caesar’s expedition",desc:"Julius Caesar led the first Roman invasion attempt; it did not establish permanent rule.",extra:"Caesar’s 55 BC invasion was unsuccessful. For nearly 100 years Britain stayed outside the Empire until Claudius’s successful invasion in AD 43.",art:["Roman galley","Eagle standard","Iron Age hillfort"],place:"South coast",q:["Who attempted to invade in 55 BC?",["Julius Caesar","Hadrian","William I","Alfred"],0]},
+{year:"AD 43",era:"Roman Britain",title:"Roman conquest begins",desc:"Emperor Claudius launched the successful Roman invasion. Roads, towns and forts followed.",extra:"Claudius’s army occupied almost all of Britain. Towns, roads and forts followed. Boudicca (Iceni) later led major resistance.",art:["Roman road","Londinium","Bath house"],place:"London / Colchester",q:["In which year did the successful Roman invasion begin?",["AD 43","AD 122","1066","1215"],0]},
+{year:"AD 60–61",era:"Roman Britain",title:"Boudicca’s rebellion",desc:"Boudicca, queen of the Iceni, led a major revolt against Roman rule.",extra:"The revolt destroyed Colchester, London and St Albans before Roman forces regained control.",art:["Chariot","Iceni coin","Burned Londinium"],place:"East Anglia",q:["Which people did Boudicca lead?",["Iceni","Normans","Picts","Saxons"],0]},
+{year:"AD 122",era:"Roman Britain",title:"Hadrian’s Wall",desc:"Emperor Hadrian ordered a frontier wall across northern England.",extra:"The wall guarded the northern frontier of the Roman province. Milecastles and watchtowers formed a continuous system.",art:["Hadrian’s Wall","Milecastle","Watchtower"],place:"Northern England",q:["Why was Hadrian’s Wall built?",["To guard the northern frontier","To stop the Normans","To divide Ireland","To carry water"],0]},
+{year:"AD 410",era:"Post-Roman",title:"Roman withdrawal",desc:"Roman armies left Britain; later Anglo-Saxon settlement reshaped language and kingdoms.",extra:"Angles, Saxons and Jutes settled. Old English developed. Kingdoms such as Wessex, Mercia and Northumbria emerged.",art:["Abandoned fort","Saxon brooch","Longhouse"],place:"Britain",q:["Who settled after Roman rule?",["Anglo-Saxons","Tudors","Victorians","Boers"],0]},
+{year:"AD 597",era:"Anglo-Saxon",title:"Christian missions",desc:"St Augustine led missionaries from Rome and became the first Archbishop of Canterbury.",extra:"Christianity had earlier roots (including in Ireland and among some British communities). Augustine’s mission is the classic handbook anchor for the English Church.",art:["Manuscript","Canterbury","Cross"],place:"Canterbury",q:["Who became the first Archbishop of Canterbury?",["St Augustine","St Patrick","St Andrew","St David"],0]},
+{year:"AD 789",era:"Viking age",title:"Viking raids and settlement",desc:"Raiders from Denmark and Norway later formed communities, especially in the Danelaw.",extra:"Place-names, law and language in eastern and northern England show Viking influence. Alfred of Wessex resisted Danish expansion.",art:["Longship","Danelaw coin","Viking place-names"],place:"East and north",q:["Where did many Vikings settle?",["The Danelaw","The Pale","Wessex only","Cornwall only"],0]},
+{year:"1066",era:"Norman",title:"Battle of Hastings",desc:"William of Normandy defeated Harold; castles, the Domesday survey and Norman French influence followed.",extra:"William I commissioned the Domesday Book to record landholding. Motte-and-bailey castles controlled the landscape.",art:["Bayeux Tapestry","Norman helmet","Motte-and-bailey castle"],place:"Hastings",q:["Who won the Battle of Hastings?",["William the Conqueror","Harold","Cnut","Robert the Bruce"],0]},
+{year:"1215",era:"Medieval",title:"Magna Carta",desc:"King John accepted a charter establishing that even the king was subject to law.",extra:"Signed at Runnymede. It limited royal power and is a foundational document in the development of the rule of law and Parliament.",art:["Magna Carta","Great seal","Parliament origins"],place:"Runnymede",q:["What principle did Magna Carta establish?",["The king is subject to law","Only nobles pay tax","England is a republic","Women may vote"],0]},
+{year:"1314",era:"Medieval",title:"Bannockburn",desc:"Robert the Bruce led the Scots to defeat Edward II’s English army.",extra:"A key victory in the Wars of Scottish Independence. Scotland retained its independence for centuries afterwards.",art:["Bruce’s banner","Medieval sword","Bannockburn field"],place:"Scotland",q:["Who led the Scots at Bannockburn?",["Robert the Bruce","Henry V","Oliver Cromwell","James Watt"],0]},
+{year:"1348",era:"Medieval",title:"Black Death",desc:"Plague killed about one third of the population in England, with a similar proportion in Scotland and Wales.",extra:"Labour shortages helped new classes such as the gentry emerge. Peasants gained bargaining power; cereal farming declined in places.",art:["Plague bell","Gentry estate","Medieval town"],place:"Britain and Ireland",q:["Which class expanded after the Black Death?",["The gentry","The Vikings","The Cavaliers","The suffragettes"],0]},
+{year:"1415",era:"Medieval",title:"Agincourt",desc:"Henry V’s outnumbered English army defeated the French during the Hundred Years War.",extra:"Longbowmen were decisive. Henry V is a major figure in the handbook’s medieval narrative.",art:["Longbow","Royal standard","Agincourt field"],place:"France",q:["Which king led England at Agincourt?",["Henry V","Henry VIII","John","Charles II"],0]},
+{year:"1485",era:"Tudor",title:"Bosworth and the Tudors",desc:"Henry Tudor defeated Richard III, became Henry VII and united Lancaster and York through marriage.",extra:"The Tudor rose symbolises the union of the red and white roses. The Wars of the Roses ended.",art:["Tudor rose","Crown","Bosworth field"],place:"England",q:["Which dynasty began in 1485?",["Tudor","Stuart","Hanoverian","Windsor"],0]},
+{year:"1530s",era:"Tudor",title:"Reformation",desc:"Henry VIII broke with Rome and established the Church of England; Wales was formally united with England during his reign.",extra:"Royal supremacy, dissolution of the monasteries, and the Act of Union with Wales are core handbook facts. Elizabeth I later consolidated the Protestant settlement.",art:["Royal supremacy","Prayer book","Dissolved abbey"],place:"England and Wales",q:["Which monarch established the Church of England?",["Henry VIII","Henry VII","Mary I","James II"],0]},
+{year:"1588",era:"Tudor",title:"Spanish Armada",desc:"English forces defeated the Spanish fleet sent to conquer England and restore Catholicism.",extra:"Elizabeth I’s reign. The defeat is a classic national memory anchor linked to naval power and Protestant identity.",art:["Golden Hind","Armada ship","Signal beacon"],place:"English Channel",q:["Which monarch reigned during the Armada?",["Elizabeth I","Victoria","Anne","Mary II"],0]},
+{year:"1642–49",era:"Civil War",title:"King versus Parliament",desc:"Civil war ended with Charles I’s execution and the Commonwealth under Oliver Cromwell.",extra:"Roundheads (Parliament) vs Cavaliers (King). After the Commonwealth and Protectorate, the monarchy was restored in 1660 under Charles II.",art:["Cavalier helmet","Roundhead armour","Parliament"],place:"England, Wales, Scotland, Ireland",q:["What were Parliament’s supporters called?",["Roundheads","Jacobites","Chartists","Suffragettes"],0]},
+{year:"1688–89",era:"Constitution",title:"Glorious Revolution and Bill of Rights",desc:"William and Mary’s settlement confirmed Parliament’s rights and limits on royal power.",extra:"The 1689 Bill of Rights is central to constitutional monarchy. James II was replaced; the balance shifted permanently towards Parliament.",art:["Bill of Rights","Parliament mace","Crown"],place:"Britain and Ireland",q:["What did the 1689 Bill of Rights confirm?",["Parliament’s rights","Roman rule","Irish independence","Universal suffrage"],0]},
+{year:"1707",era:"Union",title:"Kingdom of Great Britain",desc:"The Act/Treaty of Union joined England and Scotland while Scotland retained its legal, education and church systems.",extra:"The United Kingdom of Great Britain and Ireland followed in 1801. Scotland kept distinct institutions that still matter today.",art:["Union flag","Treaty document","Scottish seal"],place:"Great Britain",q:["What was created in 1707?",["Kingdom of Great Britain","The Commonwealth","The NHS","The EEC"],0]},
+{year:"1760s–1850s",era:"Industrial",title:"Industrial Revolution",desc:"Steam power, machinery, coal, canals, railways and steel transformed work, cities and transport.",extra:"Britain was the first country to industrialise on a large scale. James Watt improved the steam engine; the Bessemer process enabled mass steel production.",art:["Watt steam engine","Spinning mill","Stephenson railway"],place:"Britain",q:["Which power source drove industrialisation?",["Steam power","Solar power","Nuclear power","Wind power only"],0]},
+{year:"1801",era:"Union and Ireland",title:"United Kingdom of Great Britain and Ireland",desc:"The 1800 Act of Union took effect in 1801; the Union Flag incorporated St Patrick’s cross.",extra:"The flag combines St George (England), St Andrew (Scotland) and St Patrick (Ireland). The Welsh dragon is not on the Union Flag.",art:["Union Flag","Act of Union","Dublin Parliament memory"],place:"Britain and Ireland",q:["Which cross represents Ireland on the Union Flag?",["St Patrick’s","St George’s","St Andrew’s","St David’s"],0]},
+{year:"1805–15",era:"Napoleonic",title:"Trafalgar and Waterloo",desc:"Nelson led the fleet at Trafalgar (1805); Wellington defeated Napoleon at Waterloo (1815).",extra:"Nelson was killed at Trafalgar. Wellington is remembered as the Iron Duke. These victories secured British naval and European influence for the 19th century.",art:["Nelson’s column memory","Waterloo field","Royal Navy"],place:"Sea and Europe",q:["Who defeated Napoleon at Waterloo?",["Duke of Wellington","Admiral Nelson","Robert Walpole","Oliver Cromwell"],0]},
+{year:"1837–1901",era:"Victorian",title:"Victorian Britain",desc:"Empire, industry, railways, engineering and political reform expanded; the Victoria Cross was introduced during the Crimean War.",extra:"Brunel built the Great Western Railway. The Great Exhibition of 1851 displayed industrial and handmade goods in the Crystal Palace. Victoria reigned almost 64 years.",art:["Crystal Palace","Brunel bridge","Victoria Cross"],place:"UK and Empire",q:["Which engineer built the Great Western Railway?",["Isambard Kingdom Brunel","James Watt","Alan Turing","John Logie Baird"],0]},
+{year:"1914–18",era:"World War I",title:"First World War",desc:"Britain and the Empire fought with the Allies; the war ended at 11 am on 11 November 1918.",extra:"The Somme (1916) caused about 60,000 British casualties on the first day. The poppy is the remembrance symbol. The Cenotaph is a key national memorial.",art:["Poppy","Trench","Cenotaph"],place:"Europe and world",q:["Which symbol is linked to remembrance?",["Poppy","Tudor rose","Thistle only","Oak leaf"],0]},
+{year:"1918–28",era:"Democracy",title:"Votes for women",desc:"After suffragette campaigning, women over 30 gained voting rights in 1918; equal voting age with men followed in 1928.",extra:"Emmeline Pankhurst helped found the WSPU in 1903. Voting age for everyone became 18 in 1969.",art:["Suffragette sash","Ballot box","WSPU poster"],place:"United Kingdom",q:["When did women gain equal voting rights with men at 21?",["1928","1918","1969","1707"],0]},
+{year:"1921–22",era:"Ireland",title:"Partition of Ireland",desc:"A treaty led to six northern counties remaining in the UK as Northern Ireland; the rest became the Irish Free State and later a republic (1949).",extra:"The partition remains central to understanding Northern Ireland, devolution and the Good Friday Agreement.",art:["Treaty","Border line","Dublin and Belfast"],place:"Ireland",q:["How many counties formed Northern Ireland?",["Six","Four","Nine","Twelve"],0]},
+{year:"1939–45",era:"World War II",title:"Second World War",desc:"Dunkirk, the Battle of Britain, the Blitz and D-Day were key moments. Churchill became Prime Minister in 1940.",extra:"Spitfire and Hurricane were the key fighters. Radar was critical. Rutherford’s earlier atom research is linked in the handbook to later atomic science; the US used atomic bombs against Japan.",art:["Spitfire","Radar","D-Day landing craft"],place:"UK and Europe",q:["Which aircraft battle was fought in 1940?",["Battle of Britain","Battle of Hastings","Waterloo","Bannockburn"],0]},
+{year:"1945–49",era:"Post-war",title:"Welfare state, NHS, NATO",desc:"The Attlee government built the welfare state. The NHS was established in 1948; the UK joined NATO.",extra:"Beveridge Report (1942) identified five Giant Evils: Want, Disease, Ignorance, Squalor and Idleness. Aneurin Bevan led the establishment of the NHS free at the point of use. Education Act 1944 introduced free secondary education in England and Wales.",art:["NHS","Beveridge","NATO flag"],place:"United Kingdom",q:["Who led the establishment of the NHS in 1948?",["Aneurin Bevan","William Beveridge","R. A. Butler","Winston Churchill"],0]},
+{year:"1960s–70s",era:"Modern",title:"Technology and society",desc:"Television, ATM, Concorde and social change. The UK joined the EEC in 1973.",extra:"John Logie Baird is linked to television; James Goodfellow invented the ATM (first used by Barclays in Enfield, 1967); Concorde first flew in 1969, passenger service from 1976. Tim Berners-Lee invented the World Wide Web (1990).",art:["TV","ATM","Concorde"],place:"United Kingdom",q:["When did the UK join the EEC?",["1973","1998","2016","1949"],0]},
+{year:"1979–90",era:"Modern",title:"First woman Prime Minister",desc:"Margaret Thatcher became the first woman Prime Minister of the UK in 1979 and served until 1990.",extra:"The Falklands conflict (1982) followed Argentina’s invasion of the British overseas territory. The islands were recovered by a UK task force.",art:["Downing Street","Falklands","Ballot"],place:"United Kingdom",q:["Who was the first woman Prime Minister of the UK?",["Margaret Thatcher","Theresa May","Queen Elizabeth II","Barbara Castle"],0]},
+{year:"1998–99",era:"Devolution",title:"Good Friday Agreement and devolution",desc:"The 1998 Good Friday Agreement underpinned peace in Northern Ireland. Scottish Parliament and Welsh Assembly were established in 1999.",extra:"129 MSPs at Holyrood; Northern Ireland Assembly at Stormont (90 MLAs). The handbook records substantial devolved powers for Scotland.",art:["Agreement","Holyrood","Stormont"],place:"Northern Ireland, Scotland, Wales",q:["When was the Good Friday Agreement signed?",["1998","1921","1707","1949"],0]},
+{year:"2016–20",era:"Contemporary",title:"EU referendum and Brexit",desc:"The UK held a referendum on EU membership in 2016 and formally left the EU on 31 January 2020.",extra:"The handbook covers joining the EEC (1973) and the later exit. Commonwealth membership continues; NATO remains a core alliance.",art:["Referendum","EU flag","Commonwealth"],place:"United Kingdom",q:["When did the UK formally leave the EU?",["31 January 2020","2016","1973","1998"],0]}
+];
+
+const POP=[
+{y:1600,v:4.2,l:"just over 4m"},
+{y:1700,v:5,l:"5m"},
+{y:1801,v:8,l:"8m"},
+{y:1851,v:20,l:"20m"},
+{y:1901,v:40,l:"40m"},
+{y:1951,v:50,l:"50m"},
+{y:1998,v:57,l:"57m"},
+{y:2005,v:59.5,l:"just under 60m"},
+{y:2010,v:62.2,l:"just over 62m"},
+{y:2022,v:67.6,l:"est. 67.6m"}
+];
+
+function populationHTML(idx){
+  const m=M[idx];
+  const yMatch=m.year.match(/\d{3,4}/);
+  const y=yMatch?parseInt(yMatch[0],10):(m.year.includes("10,000")? -8000:0);
+  const available=POP.filter(p=>p.y<=(y||9999)||y<1000);
+  const last=available[available.length-1];
+  const context=y<1600?"Pre-series historical context — handbook population table begins in 1600.":
+    (last?`By this period the handbook series has reached: ${last.l}.`:"Handbook population series.");
+  const bars=(available.length?available:POP.slice(0,1)).map(p=>`<div class="pop-col" title="${p.y}: ${p.l}"><div class="pop-bar" style="height:${Math.max(5,p.v/67.6*58)}px"></div><small>${p.y}</small></div>`).join("");
+  return `<div class="pop-head"><div><div class="eyebrow">Population evolution</div><b>${last&&y>=1600?"Latest handbook anchor by this period":"Historical context"}</b></div><div class="pop-stat">${last&&y>=1600?last.l:"Pre-series"}</div></div><div class="pop-bars">${bars}</div><p class="note">${context}</p><p class="note"><b>Handbook series:</b> 1600 just over 4m → 1801 8m → 1901 40m → 1951 50m → 2010 just over 62m → 2022 estimated 67.6m.</p>`;
+}
+
+/* ===== Question bank (expanded, de-duplicated, book-aligned) ===== */
+const EXPLAIN={
+"How many questions are in the official test?":"The handbook states that the test consists of 24 questions drawn from all parts of the book.",
+"What score is 75% of 24?":"Eighteen correct answers out of 24 equals 75%, the pass threshold used by this study aid.",
+"What is Great Britain?":"Great Britain is the geographical grouping of England, Scotland and Wales. Northern Ireland is part of the UK but not Great Britain.",
+"What is the UK’s official name?":"The formal name is the United Kingdom of Great Britain and Northern Ireland.",
+"What is Big Ben?":"Big Ben is the great bell. The surrounding tower is commonly called the Elizabeth Tower.",
+"Who chairs Commons debates?":"The Speaker chairs House of Commons debates, maintains order and acts neutrally.",
+"How is the Speaker chosen?":"MPs choose the Speaker by secret ballot, after which the Speaker is expected to remain politically neutral.",
+"When was the Good Friday Agreement signed?":"The Good Friday Agreement was signed in 1998 and is central to the Northern Ireland peace process.",
+"Which part of Ireland remains in the UK?":"Six counties in the north remained within the UK as Northern Ireland after partition.",
+"Who became a republic in 1949?":"The Irish Free State later became a republic in 1949; Northern Ireland remained part of the UK.",
+"What did the 1832 Reform Act change?":"It expanded the electorate, abolished pocket and rotten boroughs, and shifted representation towards growing towns and cities.",
+"What is the Victoria Cross for?":"Queen Victoria introduced the Victoria Cross during the Crimean War to honour acts of valour.",
+"When did the UK join the EEC?":"The UK joined the European Economic Community in 1973.",
+"Which 2016 event preceded Brexit?":"The 2016 referendum asked voters about EU membership before the UK formally left the EU in 2020.",
+"Who founded the WSPU with others in 1903?":"Emmeline Pankhurst helped found the Women’s Social and Political Union, whose members became known as suffragettes."
+};
+
+let QB=[
+["How many questions are in the official Life in the UK test?","24",["20","30","50"],"The handbook states that the test consists of 24 questions drawn from all parts of the book."],
+["What percentage is required to pass the Life in the UK test (study aid threshold)?","75% (18/24)",["50%","60%","90%"],"Eighteen correct answers out of 24 equals 75%."],
+["What is Great Britain?","England, Scotland and Wales",["England only","The whole UK including Northern Ireland","England and Wales only"],"Great Britain is England, Scotland and Wales. Northern Ireland is part of the UK but not Great Britain."],
+["What is the UK’s official name?","United Kingdom of Great Britain and Northern Ireland",["United Kingdom of England","British Isles Federation","Kingdom of Great Britain only"],"The formal name is the United Kingdom of Great Britain and Northern Ireland."],
+["What is Big Ben?","The great bell",["The whole Palace of Westminster","The Elizabeth Tower only","The House of Commons chamber"],"Big Ben is the great bell. The tower is commonly called the Elizabeth Tower."],
+["Who chairs debates in the House of Commons?","The Speaker",["The Prime Minister","The Lord Chancellor","The monarch"],"The Speaker chairs debates, maintains order and acts neutrally."],
+["How is the Speaker of the House of Commons chosen?","By secret ballot of MPs",["Appointed by the monarch alone","Elected by the public","Chosen by the House of Lords"],"MPs choose the Speaker by secret ballot."],
+["How many MPs sit in the House of Commons?","650",["500","800","129"],"There are 650 MPs in the House of Commons."],
+["How many members does the Scottish Parliament have?","129",["60","90","650"],"There are 129 MSPs. They meet at Holyrood in Edinburgh."],
+["How many members does the Northern Ireland Assembly have?","90",["60","129","650"],"There are 90 MLAs. They meet at Stormont in Belfast."],
+["When was the Good Friday Agreement signed?","1998",["1921","1949","1707"],"The Good Friday Agreement (1998) is central to the Northern Ireland peace process."],
+["How many counties formed Northern Ireland after partition?","Six",["Four","Nine","Twelve"],"Six northern counties remained in the UK as Northern Ireland."],
+["When did the Irish Free State become a republic?","1949",["1921","1998","1801"],"The rest of Ireland became the Irish Free State and later a republic in 1949."],
+["What principle did Magna Carta (1215) establish?","Even the king is subject to law",["Universal suffrage","A republic","Only nobles pay tax"],"King John accepted Magna Carta at Runnymede, reinforcing that the monarch was subject to law."],
+["Who won the Battle of Hastings in 1066?","William the Conqueror",["Harold Godwinson","Robert the Bruce","Cnut"],"William of Normandy defeated Harold and became king."],
+["Who led the successful Roman invasion of Britain in AD 43?","Emperor Claudius",["Julius Caesar","Hadrian","Augustus"],"Julius Caesar attempted invasions earlier; Claudius launched the successful conquest."],
+["Who led the Iceni revolt against Roman rule?","Boudicca",["Emmeline Pankhurst","Queen Anne","Mary Peters"],"Boudicca, queen of the Iceni, led a major revolt in AD 60–61."],
+["Why was Hadrian’s Wall built?","To guard the northern frontier",["To mark the border with Wales","To defend London from Normans","To carry water"],"Hadrian ordered the wall in AD 122 to defend the northern frontier of the Roman province."],
+["Who became the first Archbishop of Canterbury?","St Augustine",["St Patrick","St Andrew","St David"],"St Augustine led missionaries from Rome in AD 597."],
+["Where did many Vikings settle in England?","The Danelaw",["The Pale","Wessex only","Cornwall only"],"Vikings settled particularly in the Danelaw in eastern and northern England."],
+["Who led the Scots at Bannockburn in 1314?","Robert the Bruce",["William Wallace","Bonnie Prince Charlie","Edward II"],"Robert the Bruce led the Scots to victory over Edward II’s army."],
+["About what proportion of England’s population died in the Black Death?","About one third",["About one tenth","About one half","Nearly everyone"],"The handbook says about one third died in England, with a similar proportion in Scotland and Wales."],
+["Which king led the English at Agincourt?","Henry V",["Henry VIII","Richard III","Edward II"],"Henry V’s outnumbered army defeated the French in 1415."],
+["Which battle began the Tudor dynasty?","Battle of Bosworth",["Battle of Britain","Battle of Waterloo","Battle of Bannockburn"],"Henry Tudor defeated Richard III at Bosworth in 1485 and became Henry VII."],
+["Which monarch established the Church of England?","Henry VIII",["Henry VII","Mary I","Elizabeth I"],"Henry VIII broke with Rome in the 1530s and established the Church of England."],
+["Which monarch was on the throne when the Spanish Armada was defeated?","Elizabeth I",["Mary I","Queen Anne","Victoria"],"The Armada was defeated in 1588 during Elizabeth I’s reign."],
+["What were Parliament’s supporters called in the Civil War?","Roundheads",["Cavaliers","Jacobites","Chartists"],"Parliament’s supporters were Roundheads; the king’s supporters were Cavaliers."],
+["Who became Lord Protector after the Civil War?","Oliver Cromwell",["Charles II","Robert Walpole","William of Orange"],"Cromwell led the Commonwealth and held the title Lord Protector."],
+["What did the Bill of Rights 1689 confirm?","Parliament’s rights and limits on royal power",["Universal adult suffrage","Irish independence","Creation of NATO"],"The settlement after the Glorious Revolution permanently shifted the balance towards Parliament."],
+["What did the 1707 Act of Union create?","The Kingdom of Great Britain",["The United Kingdom of Great Britain and Ireland","The Commonwealth","The European Union"],"The union joined England and Scotland; Scotland retained legal, education and church systems."],
+["Who is generally regarded as Britain’s first Prime Minister?","Sir Robert Walpole",["William Pitt","Clement Attlee","Duke of Wellington"],"Walpole served from 1721 to 1742 as George I relied heavily on ministers."],
+["What power source drove the Industrial Revolution on a large scale?","Steam power",["Solar power","Nuclear power","Wind power only"],"Mechanisation and steam power made Britain the first country to industrialise on a large scale."],
+["When did trading enslaved people in British ships or ports become illegal?","1807",["1689","1833","1918"],"The slave trade was prohibited in 1807; slavery throughout the Empire was abolished in 1833."],
+["When was slavery abolished throughout the British Empire?","1833",["1807","1776","1867"],"The Emancipation Act of 1833 abolished slavery throughout the British Empire."],
+["Who led the British fleet at Trafalgar?","Admiral Nelson",["Duke of Wellington","Captain Cook","Francis Drake"],"Nelson led the victory at Trafalgar in 1805 and was killed in the battle."],
+["Who defeated Napoleon at Waterloo?","Duke of Wellington",["Admiral Nelson","Robert Walpole","Oliver Cromwell"],"Wellington (the Iron Duke) led the forces that defeated Napoleon in 1815."],
+["Which crosses appear in the Union Flag?","St George, St Andrew and St Patrick",["St George, St David and St Patrick","St Andrew, St David and St Piran","St David only"],"The flag combines the crosses of England, Scotland and Ireland; the Welsh dragon is not included."],
+["How long did Queen Victoria reign?","Almost 64 years",["Exactly 40 years","About 25 years","More than 80 years"],"Victoria reigned from 1837 to 1901, almost 64 years."],
+["What was displayed at the Great Exhibition of 1851?","Industrial and handmade goods from around the world",["Only paintings","Only military equipment","Only agricultural crops"],"The Great Exhibition took place in the Crystal Palace in Hyde Park."],
+["Who is often regarded as the founder of modern nursing?","Florence Nightingale",["Mary Seacole","Emmeline Pankhurst","Jane Austen"],"Nightingale improved hospital conditions during the Crimean War and established a nurse training school."],
+["When did women over 30 first gain voting rights?","1918",["1903","1928","1969"],"Women over 30 gained the vote in 1918; equal terms with men at 21 followed in 1928."],
+["When did women gain the vote on the same terms as men at age 21?","1928",["1918","1945","1969"],"In 1928 women gained the vote at 21, the same age as men at that time."],
+["At what time and date did the First World War end?","11 am on 11 November 1918",["Midnight on 1 January 1919","11 am on 11 November 1916","Noon on 8 May 1945"],"The armistice took effect at the eleventh hour of the eleventh day of the eleventh month."],
+["Which 1916 battle caused about 60,000 British casualties on its first day?","Battle of the Somme",["Battle of Britain","Battle of Trafalgar","Battle of Agincourt"],"The British attack on the Somme in July 1916 caused about 60,000 casualties on the first day."],
+["Who became Prime Minister during the crisis of 1940?","Winston Churchill",["Clement Attlee","Harold Macmillan","John Major"],"Churchill became Prime Minister as German forces advanced through Europe."],
+["Which two RAF aircraft are especially associated with the Battle of Britain?","Spitfire and Hurricane",["Concorde and Harrier","Lancaster and Vulcan","Typhoon and Tornado"],"The Spitfire and Hurricane were the key British fighters named in the handbook."],
+["Who led the establishment of the NHS in 1948?","Aneurin Bevan",["William Beveridge","R. A. Butler","Clement Attlee alone"],"Health Minister Aneurin Bevan led the establishment of the NHS, free at the point of use."],
+["Which report provided the basis for the modern welfare state?","Beveridge Report",["Domesday Book","Butler Act","Bill of Rights"],"William Beveridge’s 1942 report proposed action against five Giant Evils."],
+["Which five Giant Evils did Beveridge identify?","Want, Disease, Ignorance, Squalor and Idleness",["War, Tax, Crime, Poverty and Hunger","Fear, Anger, Envy, Pride and Greed","Waste, Delay, Error, Cost and Risk"],"These five social problems framed the report’s case for a comprehensive welfare state."],
+["What did the Education Act 1944 introduce in England and Wales?","Free secondary education",["University tuition fees","Voting at 18","The Open University"],"The Butler Act introduced free secondary education and reinforced the primary-secondary division."],
+["When did the UK join the EEC?","1973",["1998","2016","1949"],"The UK joined the European Economic Community in 1973."],
+["When did the UK formally leave the EU?","31 January 2020",["2016","1973","1998"],"After the 2016 referendum, the UK left the EU on 31 January 2020."],
+["Who was the first woman Prime Minister of the UK?","Margaret Thatcher",["Theresa May","Queen Elizabeth II","Barbara Castle"],"Margaret Thatcher became Prime Minister in 1979 and served until 1990."],
+["Which country invaded the Falkland Islands in 1982?","Argentina",["Spain","France","Chile"],"Argentina invaded the British overseas territory; a UK task force recovered the islands."],
+["Who invented the World Wide Web?","Tim Berners-Lee",["Alan Turing","John Logie Baird","James Goodfellow"],"Tim Berners-Lee invented the World Wide Web; information transfer via the web is dated to 1990 in the study story."],
+["Who is linked to the invention of television in the study story?","John Logie Baird",["Tim Berners-Lee","Frank Whittle","Peter Mansfield"],"John Logie Baird is associated with television development in the handbook narrative."],
+["Who invented the cash-dispensing ATM in the 1960s?","James Goodfellow",["John Logie Baird","Frank Whittle","Peter Mansfield"],"James Goodfellow invented the ATM; the first was used by Barclays in Enfield in 1967."],
+["Where did the first cash-dispensing ATM enter service?","Enfield, north London",["Edinburgh","Cardiff Bay","Belfast"],"Barclays installed the first machine in Enfield in 1967."],
+["Who co-invented / enabled practical MRI scanning in the study story?","Sir Peter Mansfield",["Francis Crick","Alexander Fleming","Tim Berners-Lee"],"Mansfield’s work enabled exact, non-invasive images of internal organs."],
+["What proportion of the UK population lives in England according to the handbook?","About 84%",["About 50%","About 25%","About 95%"],"England about 84%, Scotland just over 8%, Wales around 5%, Northern Ireland under 3%."],
+["What is the handbook’s population figure for 1901?","40 million",["20 million","50 million","57 million"],"The population table rises from 20 million in 1851 to 40 million in 1901."],
+["What is the handbook’s estimated population for 2022?","67.6 million",["57 million","62 million","75 million"],"The population evolution table gives an estimated 67.6 million for 2022."],
+["What two factors are named as contributing to recent population growth?","Migration and longer life expectancy",["Falling life expectancy and emigration","Only higher birth rates","Industrialisation and empire"],"The handbook explicitly links faster recent growth to migration into the UK and longer life expectancy."],
+["In the 2009 Citizenship Survey, what percentage identified as Christian?","70%",["50%","90%","21%"],"70% Christian; 21% no religion; Muslim 4%; Hindu 2%; Sikh 1%; Jewish and Buddhist each under 0.5%."],
+["What percentage said they had no religion in the 2009 Citizenship Survey?","21%",["4%","70%","2%"],"21% said they had no religion."],
+["What is the currency of the UK?","Pound sterling (£)",["Euro","Dollar","Franc"],"The pound sterling is divided into 100 pence."],
+["Which UK nations issue their own banknotes?","Scotland and Northern Ireland",["England and Wales","Wales and Scotland","England and Northern Ireland"],"Their banknotes are valid across the UK, although individual businesses do not have to accept them."],
+["What is the capital of Scotland?","Edinburgh",["Glasgow","Aberdeen","Dundee"],"Edinburgh is the capital of Scotland; the Scottish Parliament sits at Holyrood."],
+["What is the capital of Wales?","Cardiff",["Swansea","Newport","Wrexham"],"Cardiff is the capital of Wales."],
+["What is the capital of Northern Ireland?","Belfast",["Derry","Lisburn","Newry"],"Belfast is the capital of Northern Ireland; the Assembly meets at Stormont."],
+["Which day is St George’s Day?","23 April",["1 March","17 March","30 November"],"St George’s Day (England) is 23 April; St David’s (Wales) 1 March; St Patrick’s 17 March; St Andrew’s 30 November."],
+["What is the established Church in England?","Church of England (Anglican)",["Church of Scotland","Roman Catholic Church","Methodist Church"],"The monarch is Supreme Governor; the Archbishop of Canterbury is the spiritual leader. Several bishops sit in the House of Lords."],
+["What is the national Church of Scotland?","Church of Scotland (Presbyterian)",["Church of England","Roman Catholic Church","Baptist Church"],"It is governed by ministers and elders; the Moderator chairs the General Assembly for one year."],
+["What is canvassing?","Persuading people to vote for a candidate",["Counting census forms","Selecting jurors","Chairing Parliament"],"Party members may distribute leaflets or knock on doors; voters need not reveal their choice."],
+["Which three strategic roles do school governors have?","Set direction, ensure accountability, monitor and evaluate",["Teach lessons, set exams, award degrees","Collect taxes, make laws, appoint judges","Run elections, manage police, issue passports"],"The handbook lists strategic direction, accountability, and monitoring and evaluation."],
+["At what minimum age can you vote in a general election (study source)?","18",["16","21","25"],"Voting age became 18 in 1969."],
+["At what minimum age can you drive a car in the study source?","17",["16","18","21"],"17 for car/motorcycle; 16 for moped under stated conditions."],
+["What is St Andrews known as?","The home of golf",["The home of tennis","The home of rugby","The home of cricket"],"St Andrews in Scotland is known as the home of golf."],
+["Where is Wimbledon?","London",["Edinburgh","Cardiff","Belfast"],"Wimbledon is the famous tennis championship held in London."],
+["Who won rowing gold at five consecutive Olympic Games?","Sir Steve Redgrave",["Mary Peters","Mo Farah","Jessica Ennis-Hill"],"Sir Steve Redgrave is a key Olympic memory anchor in the handbook."],
+["Who won pentathlon gold in 1972 and is strongly associated with Northern Ireland sport?","Mary Peters",["Steve Redgrave","Tanni Grey-Thompson","Kelly Holmes"],"Mary Peters is linked to Northern Ireland sporting achievement in the study story."],
+["What did the Bessemer process enable?","Mass production of steel",["Broadcast television","Production of penicillin","Secret ballots"],"Cheap mass-produced steel supported shipbuilding and railway expansion."],
+["Who opened Britain’s first curry house in 1810?","Sake Dean Mahomet",["Isambard Kingdom Brunel","Rudyard Kipling","Robert Burns"],"Sake Dean Mahomet opened the Hindoostane Coffee House in London."],
+["Which thinker is strongly associated with economics and the Scottish Enlightenment?","Adam Smith",["John Logie Baird","Alan Turing","Robert Burns"],"Adam Smith developed influential ideas about economics during the Enlightenment."],
+["What happened in Britain around 10,000 years ago?","Rising sea levels separated it from continental Europe",["The Romans built Hadrian’s Wall","The Norman conquest began","The Act of Union was signed"],"After the last Ice Age, rising sea levels permanently separated Britain from continental Europe."],
+["What major change arrived about 6,000 years ago?","Farming",["Steam power","Printing","Railways"],"Farming communities built houses, tombs and monuments."],
+["Where is Stonehenge?","Wiltshire",["Belfast","York","Dublin"],"Stonehenge is in Wiltshire; Skara Brae is in Orkney."],
+["Who attempted to invade Britain in 55 BC?","Julius Caesar",["Hadrian","William I","Alfred"],"Caesar’s expeditions did not establish permanent rule; Claudius succeeded in AD 43."],
+["Who settled in Britain after Roman rule ended?","Anglo-Saxons",["Tudors","Victorians","Normans only"],"Angles, Saxons and Jutes settled; language and kingdoms were reshaped."],
+["What survey is associated with Norman England?","Domesday Book",["Beveridge Report","Magna Carta","Bill of Rights"],"William I commissioned the Domesday survey to record landholding and resources."],
+["Which king accepted Magna Carta in 1215?","King John",["Henry V","Charles I","James II"],"King John accepted Magna Carta at Runnymede."],
+["What were supporters of the king called in the Civil War?","Cavaliers",["Roundheads","Jacobites","Chartists"],"Cavaliers supported the king; Roundheads supported Parliament."],
+["What happened in the Restoration of 1660?","The monarchy returned under Charles II",["Parliament was abolished","Scotland left Britain","The Roman army returned"],"After the Commonwealth, Charles II was invited back as king."],
+["Who is associated with improving the steam engine?","James Watt",["Isambard Kingdom Brunel","Alan Turing","John Logie Baird"],"Watt’s improvements helped drive industrialisation."],
+["Which engineer is linked to the Great Western Railway?","Isambard Kingdom Brunel",["James Watt","George Stephenson","Robert Stephenson only"],"Brunel is a major Victorian engineering figure in the handbook."],
+["When did the BBC begin radio broadcasts?","1922",["1918","1936","1948"],"The BBC began radio in 1922 and launched the world’s first regular television service in 1936."],
+["Why was migration encouraged after the Second World War?","To address labour shortages during rebuilding",["To reduce city populations","To end the NHS","To replace Parliament"],"Workers came from Ireland, Europe, the West Indies and South Asia to help rebuild and staff industries."],
+["Which aircraft first flew in 1969 and carried passengers from 1976?","Concorde",["Harrier jump jet","Spitfire","Hurricane"],"Britain and France developed Concorde; passenger service began in 1976."],
+["What is the Commonwealth?","An association of countries, many former colonies, with no power over members",["A military alliance only","A currency union","A replacement for the EU"],"It developed as former colonies became independent; it can suspend membership but has no power over members."],
+["What are the fundamental principles of British life listed in the handbook?","Democracy, rule of law, individual liberty, tolerance of different faiths and beliefs, participation in community life",["Monarchy only, free markets, empire","Uniform religion, no immigration, hereditary rule","Military service, high taxes, closed borders"],"These values underpin the responsibilities and freedoms of residents and citizens."],
+["What freedoms does the UK offer in return for respecting the law and others’ rights?","Freedom of belief and religion, freedom of speech, freedom from unfair discrimination, right to a fair trial, right to join in the election of a government",["Unlimited free housing and no taxes","Only freedom of speech","Only the right to vote"],"These are listed alongside the responsibilities of permanent residents and citizens."],
+
+["Which TWO islands are known as Crown dependencies?", "The Channel Islands and the Isle of Man", ["Ceylon and the Falklands", "St Helena and Gibraltar", "Orkney and Shetland"], "The Channel Islands and the Isle of Man are closely linked with the UK but are not part of it; they have their own governments and are called Crown dependencies."],
+["Who led a Roman invasion of Britain in 55 BC?", "Julius Caesar", ["Emperor Claudius", "Hadrian", "William the Conqueror"], "Julius Caesar led a Roman invasion in 55 BC. It was unsuccessful; permanent conquest came under Claudius in AD 43."],
+["What name is given to Bronze Age tombs where people buried their dead?", "Round barrows", ["Skara Brae", "Hill forts", "Longships"], "During the Bronze Age people lived in roundhouses and buried their dead in tombs called round barrows."],
+["Which Iron Age hill fort can still be seen in Dorset?", "Maiden Castle", ["Conwy Castle", "Caernarfon Castle", "Edinburgh Castle"], "A very impressive Iron Age hill fort can still be seen today at Maiden Castle, in the English county of Dorset."],
+["What was inscribed on some of the first coins minted in Britain during the Iron Age?", "The names of Iron Age kings", ["Celtic symbols only", "Drawings of animals only", "Plant names"], "Iron Age people made the first coins to be minted in Britain, some inscribed with the names of Iron Age kings."],
+["Where did glass manufacturers who came to medieval England often come from?", "Italy", ["Germany", "Holland", "France"], "People came to trade and work; many had special skills such as weavers from France, engineers from Germany, glass manufacturers from Italy and canal builders from Holland."],
+["In 1284, which statute annexed Wales to the Crown of England?", "Statute of Rhuddlan", ["Magna Carta", "Act of Union", "Bill of Rights"], "In 1284 King Edward I introduced the Statute of Rhuddlan, which annexed Wales to the Crown of England."],
+["What does the Habeas Corpus Act of 1679 guarantee?", "That no one could be held prisoner unlawfully", ["The right to vote at 21", "Abolition of slavery", "Freedom of the press only"], "The Habeas Corpus Act became law in 1679 and guaranteed that no one could be held prisoner unlawfully; every prisoner has a right to a court hearing."],
+["Who was the first man generally regarded as Prime Minister (1721–1742)?", "Sir Robert Walpole", ["Admiral Nelson", "Henry Pelham", "William Pitt"], "Sir Robert Walpole is generally regarded as Britain’s first Prime Minister, serving from 1721 to 1742."],
+["During the Victorian period, what was the estimated population of the British Empire?", "More than 400 million people", ["More than 100 million", "About 50 million", "More than 1 billion"], "During the Victorian period the British Empire became the largest the world has ever seen, with an estimated population of more than 400 million people."],
+["Between 1870 and 1914, about how many Russian and Polish Jews came to Britain to escape persecution?", "Around 120,000", ["Around 12,000", "Around 500,000", "Around 1 million"], "Between 1870 and 1914, around 120,000 Russian and Polish Jews came to Britain to escape persecution."],
+["Which Act abolished slavery throughout the British Empire in 1833?", "The Emancipation Act", ["The Freedom Act", "Habeas Corpus Act", "Reform Act"], "The Emancipation Act of 1833 abolished slavery throughout the British Empire (the slave trade had been made illegal earlier, in 1807)."],
+["Who discovered penicillin in 1928?", "Alexander Fleming", ["John MacLeod", "Howard Florey only", "Francis Crick"], "Alexander Fleming was researching influenza in 1928 when he discovered penicillin."],
+["Which Scottish physician was co-discoverer of insulin?", "John MacLeod", ["Alexander Fleming", "Sir Robert Watson-Watt", "Peter Mansfield"], "The Scottish physician and researcher John MacLeod was the co-discoverer of insulin, used to treat diabetes."],
+["Who invented the hovercraft?", "Sir Christopher Cockerell", ["Sir Frank Whittle", "John Logie Baird", "Tim Berners-Lee"], "Sir Christopher Cockerell, a British inventor, invented the hovercraft in the 1950s."],
+["In 1932, who made the first television broadcast between London and Glasgow?", "John Logie Baird", ["Alan Turing", "Tim Berners-Lee", "Robert Watson-Watt"], "Scotsman John Logie Baird developed television in the 1920s; in 1932 he made the first television broadcast between London and Glasgow."],
+["Which two countries developed Concorde?", "Britain and France", ["USA and Canada", "Germany and France", "Britain and USA"], "Britain and France developed Concorde; it first flew in 1969 and began carrying passengers in 1976."],
+["When did Concorde first fly?", "1969", ["1970", "1975", "1976"], "Concorde first flew in 1969 and began carrying passengers in 1976."],
+["About how many British casualties were there on the first day of the Somme (July 1916)?", "About 60,000", ["About 6,000", "About 600,000", "About 10,000"], "The British attack on the Somme in July 1916 resulted in about 60,000 British casualties on the first day alone."],
+["When did the First World War end?", "11 am on 11 November 1918", ["11 pm on 11 November 1916", "Midnight on 1 January 1919", "Noon on 8 May 1945"], "The war ended at 11 am on 11 November 1918."],
+["What name is given to the German night-time bombing of London and other British cities in 1940?", "The Blitz", ["The Axis", "Dunkirk", "D-Day"], "The Blitz refers to German bombing of London and other British cities, especially during 1940–41."],
+["When was the NHS established?", "1948", ["1945", "1952", "1960"], "In 1948 Aneurin (Nye) Bevan, Minister for Health, led the establishment of the NHS, free at the point of use."],
+["In the 1960s, which social laws were liberalised in England, Wales and Scotland?", "Divorce and abortion", ["Immigration only", "Adoption only", "Voting age only"], "The 1960s saw liberalisation of social laws, for example in relation to divorce and to abortion in England, Wales and Scotland."],
+["Who was the first person to sail single-handed around the world without stopping?", "Sir Robin Knox-Johnston", ["Sir Francis Chichester", "Dame Ellen MacArthur", "Sir Francis Drake"], "Sir Francis Chichester was first to sail single-handed around the world (1966/67); two years later Sir Robin Knox-Johnston became the first to do so without stopping."],
+["Who was the first Briton to win the Tour de France?", "Bradley Wiggins", ["Sir Chris Hoy", "Sir Steve Redgrave", "Mo Farah"], "In 2012 Bradley Wiggins became the first Briton to win the Tour de France."],
+["Where is the Giant’s Causeway?", "Northern Ireland", ["Scotland", "Wales", "Cornwall"], "The Giant’s Causeway is on the north-east coast of Northern Ireland."],
+["Post-war immigration means that nearly what percentage of the population has a parent or grandparent born outside the UK?", "Nearly 10%", ["Nearly 5%", "Nearly 25%", "Nearly 50%"], "Post-war immigration means that nearly 10% of the population has a parent or grandparent born outside the UK."],
+["What is the minimum age to go into betting shops or gambling clubs?", "18", ["16", "21", "14"], "You have to be 18 to go into betting shops or gambling clubs."],
+["At 16, what can people do regarding alcohol in a hotel or restaurant meal (with someone over 18)?", "Drink wine or beer with a meal", ["Buy spirits", "Go into a betting shop", "Serve on a jury"], "At 16, people can drink wine or beer with a meal in a hotel or restaurant if with someone over 18."],
+["Where is the Cenotaph, centrepiece of the Remembrance Day service?", "Whitehall, London", ["Cardiff", "Edinburgh", "Belfast"], "The Cenotaph in Whitehall, London, is the centrepiece of the annual Remembrance Day service."],
+["Which flower is associated with Scotland?", "Thistle", ["Rose", "Daffodil", "Shamrock"], "The thistle is associated with Scotland."],
+["What is 31 December called in Scotland?", "Hogmanay", ["Bonfire Night", "Burns Night", "St Andrew’s Day"], "In Scotland, 31 December is called Hogmanay."],
+["When is St George’s Day?", "23 April", ["1 March", "17 March", "30 November"], "St George’s Day (England) is 23 April."],
+["Who designed many 18th-century country-house landscapes to look natural?", "Lancelot ‘Capability’ Brown", ["Edwin Lutyens", "Christopher Wren", "Inigo Jones"], "Lancelot ‘Capability’ Brown designed grounds around country houses so the landscape appeared natural, with grass, trees and lakes."],
+["Where was the first tennis club in the UK founded (1872)?", "Leamington Spa", ["Wimbledon", "St Andrews", "Bath"], "The first tennis club was founded in Leamington Spa in 1872."],
+["What is the longest mainland distance in the UK roughly from?", "John O’Groats to Land’s End", ["London to Edinburgh", "Cardiff to Belfast", "Dover to Holyhead"], "The longest distance on the mainland is from John O’Groats (north coast of Scotland) to Land’s End (south-west England), about 870 miles."],
+["Who first built the Tower of London after 1066?", "William the Conqueror", ["Henry VIII", "Oliver Cromwell", "Edward I"], "The Tower of London was first built by William the Conqueror after he became king in 1066."],
+["What is the official Church of the state in England?", "The Church of England", ["Church of Scotland", "Roman Catholic Church", "Methodist Church"], "The official Church of the state is the Church of England (Anglican Church)."],
+["Who is the spiritual leader of the Church of England?", "The Archbishop of Canterbury", ["The Pope", "The Moderator", "The monarch only"], "The spiritual leader of the Church of England is the Archbishop of Canterbury; the monarch is Supreme Governor."],
+["Which Paralympian won 16 medals including 11 gold over five Games?", "Baroness Tanni Grey-Thompson", ["Dame Kelly Holmes", "Mary Peters", "David Weir"], "Baroness Tanni Grey-Thompson won 16 Paralympic medals, including 11 gold, over five Paralympic Games."],
+["Which two universities race annually on the Thames?", "Oxford and Cambridge", ["London and Manchester", "Edinburgh and Glasgow", "Bristol and Bath"], "There is a popular yearly rowing race on the Thames between Oxford and Cambridge Universities."],
+["When did Ireland become two countries after the peace treaty?", "1922", ["1916", "1949", "1998"], "In 1921 a peace treaty was signed and in 1922 Ireland became two countries (Northern Ireland remaining in the UK; the rest becoming the Irish Free State, later a republic)."],
+["Which country was NOT among the founders of the EEC in 1957?", "The UK", ["France", "Belgium", "The Netherlands"], "West Germany, France, Belgium, Italy, Luxembourg and the Netherlands formed the EEC in 1957; the UK joined later, in 1973."],
+["Who composed ‘The Planets’?", "Gustav Holst", ["Edward Elgar", "Handel", "Purcell"], "Gustav Holst’s work includes The Planets, a suite themed around the planets and the solar system."],
+["What are Yeoman Warders at the Tower of London also known as?", "Beefeaters", ["Chartists", "Roundheads", "Cavaliers"], "Tours at the Tower of London are given by the Yeoman Warders, also known as Beefeaters."],
+["Which is a traditional Scottish food mentioned in the handbook?", "Haggis", ["Ulster fry", "Welsh cakes only", "Cornish pasty"], "Haggis is a traditional Scottish food."],
+["Where is Bodnant Garden?", "Wales", ["Scotland", "Northern Ireland", "Cornwall"], "Famous gardens include Bodnant Garden in Wales, among others in England, Scotland and Northern Ireland."],
+["What is the money from TV licences mainly used to pay for?", "The BBC", ["Private channels", "Only sports events", "Local councils"], "Money from TV licences is used to pay for the BBC, a public service broadcaster independent of government."],
+["When is Vaisakhi (Sikh festival marking the Khalsa) celebrated?", "14 April", ["14 February", "31 October", "25 December"], "Vaisakhi celebrates the founding of the Sikh community (Khalsa) and is celebrated on 14 April."],
+["Who was the first wife of Henry VIII?", "Catherine of Aragon", ["Anne Boleyn", "Jane Seymour", "Anne of Cleves"], "Catherine of Aragon was Henry VIII’s first wife."],
+["Who was the mother of Elizabeth I?", "Anne Boleyn", ["Catherine of Aragon", "Jane Seymour", "Catherine Howard"], "Elizabeth I was the daughter of Henry VIII and Anne Boleyn."],
+["When did Henry VIII die?", "January 1547", ["January 1557", "February 1547", "1509"], "Henry VIII died on 28 January 1547 and was succeeded by his son Edward VI."],
+["Which flag is NOT represented on the Union Flag?", "The Welsh flag (dragon)", ["St George’s Cross", "St Andrew’s Cross", "St Patrick’s Cross"], "The Welsh dragon does not appear on the Union Flag because when the first Union Flag was created, Wales was already united with England."],
+["Where can HMS Victory (Nelson’s ship) be visited?", "Portsmouth", ["Plymouth", "Hastings", "London"], "Admiral Nelson’s ship, HMS Victory, can be visited in Portsmouth."],
+["What commemorates the Battle of Hastings in a famous embroidery?", "The Bayeux Tapestry", ["The Domesday Book", "Magna Carta", "The Armada portrait"], "The Battle of Hastings is commemorated in the Bayeux Tapestry, which can still be seen in France."],
+["During the Crusades, European Christians fought for control of what?", "The Holy Land", ["Ireland", "Scotland", "Central Europe only"], "During the Middle Ages many knights took part in the Crusades, in which European Christians fought for control of the Holy Land."],
+["Which place-name type is associated with Viking settlement?", "Names such as Scunthorpe and Grimsby", ["All Welsh place names", "Only Scottish Gaelic names", "Roman road names only"], "Words and place-names such as Grimsby and Scunthorpe come from the Viking languages."],
+["Who succeeded Henry VIII?", "Edward VI", ["Elizabeth I", "Mary I", "James I"], "Henry VIII was succeeded by his son Edward VI."],
+["In May 2010, who became Prime Minister after a coalition was formed?", "David Cameron (Conservative)", ["Nick Clegg as PM", "Gordon Brown", "Tony Blair"], "No party won an overall majority; Conservatives and Liberal Democrats formed a coalition and Conservative leader David Cameron became Prime Minister."],
+["Which groups in 17th-century Parliament were known as the Whigs and the Tories?", "The two main political groups of the period", ["Labour and Conservative only", "Roundheads and Cavaliers only", "Chartists and Liberals"], "During the 17th century there were two main groups in Parliament, known as the Whigs and the Tories."],
+["What is Robert Burns’s best-known work often sung at New Year?", "Auld Lang Syne", ["Paradise Lost", "Beowulf", "Jerusalem"], "Burns’s best-known work is probably the song Auld Lang Syne, sung at New Year (Hogmanay in Scotland)."],
+["Emmeline Pankhurst was born in which city?", "Manchester", ["London", "Liverpool", "Birmingham"], "Emmeline Pankhurst was born in Manchester in 1858; she helped found the WSPU in 1903."],
+["When did Emmeline Pankhurst set up the Women’s Franchise League?", "1889", ["1903", "1918", "1928"], "She set up the Women’s Franchise League in 1889 (fighting for married women’s local votes); in 1903 she helped found the WSPU."],
+
+["Which territories are British overseas territories named in the handbook?","St Helena and the Falkland Islands",["Ireland and the Canary Islands","Ceylon and Malta only","Orkney and Shetland"],"There are several British overseas territories such as St Helena and the Falkland Islands; they are linked to the UK but not part of it."],
+["Which part of the UK is not included in Great Britain?","Northern Ireland",["Scotland","Wales","England"],"Great Britain refers only to England, Scotland and Wales, not to Northern Ireland."],
+["Where does the UK Parliament sit?","Westminster",["Edinburgh","Cardiff","Belfast"],"The UK is governed by the parliament sitting in Westminster."],
+["Which line is NOT part of the citizenship pledge?","Long live our noble King!",["I will give my loyalty to the United Kingdom","I will uphold its democratic values","I will observe its laws faithfully"],"The pledge includes loyalty, democratic values, and observing laws; Long live our noble King is from the National Anthem, not the citizenship pledge."],
+["Do new citizens pledge loyalty to the UK and respect for its rights and freedoms?","True",["False","Only for dual nationals","Only in Scotland"],"As part of the citizenship ceremony, new citizens pledge loyalty to the United Kingdom and respect for its rights and freedoms."],
+["Which statement about devolution is true?","Scotland, Wales and Northern Ireland have parliaments or assemblies with devolved powers",["Only Scotland has a parliament","The UK is governed from Edinburgh","Northern Ireland has no assembly"],"Scotland, Wales and Northern Ireland have parliaments or assemblies of their own, with devolved powers in defined areas."],
+["What name is given to the rapid development of industry in Britain in the 18th and 19th centuries?","The Industrial Revolution",["The Enlightenment","The Victorian period only","The inter-war period"],"The Industrial Revolution was the rapid development of industry in Britain in the 18th and 19th centuries."],
+["Which forts form part of Hadrian's Wall?","Housesteads and Vindolanda",["Stonehenge and Maiden Castle","Conwy and Caernarfon","Tower of London only"],"Parts of Hadrian's Wall include the forts of Housesteads and Vindolanda."],
+["What was the name of the first cloned mammal (British team, 1996)?","Dolly the sheep",["Molly","Colin","Alice"],"Sir Ian Wilmut and Keith Campbell led the team that first cloned a mammal, Dolly the sheep, in 1996."],
+["About how many British casualties were there in the First World War?","More than 2 million",["About 200,000","More than 10 million","Fewer than 500,000"],"Millions were killed or wounded, with more than 2 million British casualties."],
+["Why did Henry VIII seek to divorce Catherine of Aragon?","He hoped another wife would give him a son and heir",["She was Spanish only","Parliament ordered it","She refused to be queen"],"When Catherine was too old to give him another child, Henry decided to divorce her, hoping another wife would give him a son and heir."],
+["How many British citizens left the country between 1853 and 1913?","As many as 13 million",["About 1 million","About 3 million","About 30 million"],"Between 1853 and 1913, as many as 13 million British citizens left the country."],
+["Who was known as the Iron Duke?","The Duke of Wellington",["Duke of Edinburgh","Duke of Lancaster","Admiral Nelson"],"Wellington defeated Napoleon at Waterloo and was known as the Iron Duke; he later became Prime Minister."],
+["When did Argentina invade the Falkland Islands?","1982",["1980","1990","1979"],"In 1982 Argentina invaded the Falkland Islands, a British overseas territory; a UK task force recovered them."],
+["When did the Roman army leave Britain?","AD 410",["AD 43","AD 122","AD 600"],"The Roman army left Britain in AD 410 to defend other parts of the Empire and never returned."],
+["What was the ability of the Harrier jump jet?","To take off vertically",["To carry 1,000 passengers","To float on water","Nuclear propulsion"],"The Harrier jump jet, capable of taking off vertically, was designed and developed in the UK."],
+["Which two of Henry VIII's wives were executed?","Anne Boleyn and Catherine Howard",["Catherine of Aragon and Jane Seymour","Anne of Cleves and Catherine Parr","Jane Seymour and Anne of Cleves"],"Anne Boleyn and Catherine Howard were accused of taking lovers and executed."],
+["What British theoretical device influenced computer science?","The Turing machine",["The jet engine","Radar alone","The hovercraft"],"Alan Turing's theoretical Turing machine (1930s) was influential in the development of computer science and modern computers."],
+["Which 18th-century Scottish philosopher's ideas about human nature remain influential?","David Hume",["Aristotle","Sigmund Freud","Plato"],"During the 18th century, David Hume's ideas about human nature continued to influence philosophers."],
+["Where was an Anglo-Saxon king buried with treasure and armour?","Sutton Hoo, Suffolk",["Maiden Castle, Dorset","Stonehenge","Skara Brae"],"The burial place of one of the Anglo-Saxon kings was at Sutton Hoo in modern Suffolk."],
+["Which modern English word comes from Norman French?","Beauty (also park)",["Cow","Apple","Summer"],"Some modern English words such as park and beauty are based on Norman French words."],
+["What was the symbol of the House of York in the Wars of the Roses?","A white rose",["A red rose","A black rose","A thistle"],"York's symbol was a white rose; Lancaster's was a red rose; the Tudor rose combined both."],
+["Where is the statue of Boudicca?","Westminster Bridge, London",["London Bridge","Tower of London only","Edinburgh Castle"],"There is a statue of Boudicca on Westminster Bridge near the Houses of Parliament."],
+["Who became especially popular after the defeat of the Spanish Armada in 1588?","Elizabeth I",["Mary I","James I","Henry VIII"],"Elizabeth I became one of the most popular monarchs, particularly after 1588 when the English defeated the Spanish Armada."],
+["When was Concorde retired from service?","2003",["1976","1999","2010"],"Concorde first flew in 1969, carried passengers from 1976, and was retired in 2003."],
+["What was the original name of what became the EU?","European Economic Community (EEC)",["Union of European Countries","European Political Union","Europe United"],"Six western European countries set up the EEC by the Treaty of Rome (1957); the UK joined in 1973."],
+["Which Act incorporated the European Convention on Human Rights into UK law?","Human Rights Act 1998",["Equality Act 2010","Freedom Act 2012","Discrimination Act 1995"],"The Human Rights Act 1998 incorporated the European Convention on Human Rights into UK law."],
+["When was the EU membership referendum held?","23 June 2016",["23 July 2016","23 June 2015","31 January 2020"],"The Conservative government held a referendum on EU membership on 23 June 2016."],
+["Which comic operas are by Gilbert and Sullivan?","HMS Pinafore, The Pirates of Penzance and The Mikado",["Cats and Phantom of the Opera","Jesus Christ Superstar only","Messiah"],"Gilbert and Sullivan wrote comic operas including HMS Pinafore, The Pirates of Penzance and The Mikado."],
+["Who won two Olympic gold medals for running in 2004?","Dame Kelly Holmes",["Dame Ellen MacArthur","Jessica Ennis-Hill","Mary Peters"],"Dame Kelly Holmes won two gold medals for running at the 2004 Olympic Games."],
+["Who was Robert Burns?","A Scottish poet (The Bard)",["A Welsh scientist","An Irish engineer","A British musician only"],"Robert Burns, known in Scotland as The Bard, was a Scottish poet; Auld Lang Syne is his best-known work."],
+["Which force fought the Battle of Britain?","The Royal Air Force",["The Royal Navy alone","The Army only","The Police"],"The Battle of Britain was fought by the Royal Air Force in 1940."],
+["Which poet was especially inspired by nature?","William Wordsworth",["Wilfred Owen","Siegfried Sassoon","John Masefield only"],"British poets including William Wordsworth were inspired by nature."],
+["Who was William Wilberforce?","A politician and leading abolitionist",["A poet","A sportsman","A musician"],"William Wilberforce, an evangelical Christian and MP, played an important part in turning opinion against the slave trade."],
+["Who designed Art Deco ceramics?","Clarice Cliff",["Thomas Chippendale","Mary Quant","Alexander McQueen"],"Clarice Cliff designed Art Deco ceramics; Chippendale designed 18th-century furniture."],
+["What was the first war extensively covered by the media (news and photographs)?","The Crimean War",["The Boer War","World War I only","World War II only"],"The Crimean War was the first war to be extensively covered by the media through news stories and photographs."],
+["In 1776, which colonies declared independence demanding no taxation without representation?","Thirteen North American colonies",["South African colonies","Asian colonies","Caribbean only"],"In 1776, 13 North American colonies declared independence, stating people had a right to establish their own governments."],
+["Who wrote poems inspired by Scotland and Border stories?","Sir Walter Scott",["Geoffrey Chaucer","William Blake","William Wordsworth only"],"Sir Walter Scott wrote poems inspired by Scotland and traditional stories from the Anglo-Scottish borders."],
+["What name was given to Irish people who favoured complete independence in the 19th century?","Fenians",["Quakers","Highlanders","Suffragettes"],"Some in the Irish Nationalist movement, such as the Fenians, favoured complete independence."],
+["Who can apply for National Citizen Service?","16- and 17-year-olds",["14- and 15-year-olds","18- and 19-year-olds only","Under-16s only"],"The National Citizen Service programme is for 16- and 17-year-olds."],
+["When were Forced Marriage Protection Orders introduced in Scotland?","November 2011",["2007","2008","2010"],"Similar Protection Orders were introduced in Scotland in November 2011 (2008 for England, Wales and Northern Ireland under the 2007 Act)."],
+["Who wrote the oratorio Messiah, often sung at Easter?","George Frederick Handel",["Edward Elgar","Gustav Holst","Henry Purcell"],"Handel wrote Messiah, regularly sung by choirs, often at Easter; he also wrote Water Music and Music for the Royal Fireworks."],
+["Who directed Four Weddings and a Funeral (1994)?","Mike Newell",["Hugh Hudson","Kevin MacDonald","Nicolas Roeg"],"Four Weddings and a Funeral (1994) was directed by Mike Newell."],
+["Who introduced a Scottish Parliament and a Welsh Assembly as Labour leader?","Tony Blair",["Clement Attlee","Gordon Brown","James Callaghan"],"In 1997 Labour led by Tony Blair was elected; the government introduced a Scottish Parliament and a Welsh Assembly."],
+["What is the small claims limit in England and Wales (handbook figure)?","Less than £10,000",["Less than £15,000","Less than £5,000","Less than £3,000"],"The small claims procedure is used for claims of less than £10,000 in England and Wales and £5,000 in Scotland and Northern Ireland."],
+["What is the small claims limit in Scotland and Northern Ireland (handbook)?","£5,000",["£10,000","£8,000","£15,000"],"Small claims: less than £10,000 in England and Wales; £5,000 in Scotland and Northern Ireland."],
+["Who developed radar and proposed detecting aircraft by radio waves?","Sir Robert Watson-Watt",["John MacLeod","Frank Whittle","Alan Turing"],"Radar was developed by Scotsman Sir Robert Watson-Watt; the first successful radar test was in 1935."],
+["What kind of films is Nick Park known for?","Animated films (e.g. Wallace and Gromit)",["Horror","Action only","Documentaries only"],"Nick Park has won Oscars for animated films including Wallace and Gromit; Britain is strong in animation and special effects."],
+["What crop failure caused the mid-19th-century Irish famine?","Potato",["Wheat","Corn","Oats"],"The potato crop failed and Ireland suffered a famine; about a million people died from disease and starvation."],
+["Who was the longest-serving UK Prime Minister of the 20th century?","Margaret Thatcher",["Winston Churchill","Tony Blair","Harold Wilson"],"Margaret Thatcher was the first woman PM and the longest-serving PM of the 20th century (1979-1990)."],
+["What were Dutch settlers in South Africa called in the Boer War context?","Boers",["Blacksmiths","Conquistadors","Beefeaters"],"The British fought settlers from the Netherlands called the Boers in South Africa; the war lasted over three years."],
+["What made Sir Roger Bannister famous?","First man to run a mile in under four minutes (1954)",["Five Olympic rowing golds","Tour de France win","Climbing Everest"],"Sir Roger Bannister was the first man in the world to run a mile in under four minutes, in 1954."],
+["What did the Factories Act of 1847 do?","Limited women and children's work to 10 hours per day",["Raised hours to 12 for everyone","Banned all child labour instantly","Created the NHS"],"The Factories Act of 1847 limited the hours that women and children could work to 10 hours per day."],
+["Where did Isaac Newton study?","Cambridge University",["Oxford only","Edinburgh","St Andrews"],"Isaac Newton studied at Cambridge University."],
+["When were films first shown publicly in the UK?","1896",["1887","1901","1922"],"Films were first shown publicly in the UK in 1896 and quickly became popular."],
+["Who succeeded David Cameron after the EU referendum?","Theresa May",["Boris Johnson immediately","Gordon Brown","Liz Truss"],"David Cameron was succeeded as Prime Minister by Theresa May on 13 July 2016."],
+["Which Reform Act abolished pocket and rotten boroughs and gave more seats to towns?","Reform Act of 1832",["Emancipation Act 1833","Reform Act of 1867 only","Bill of Rights"],"The Reform Act of 1832 increased the electorate, abolished pocket and rotten boroughs, and gave more seats to towns and cities."],
+["When did Emmeline Pankhurst die?","1928",["1918","1936","1903"],"Emmeline Pankhurst died in 1928; shortly before, women gained the vote at 21, the same as men."],
+["Where was William Shakespeare born?","Stratford-upon-Avon",["London","Liverpool","Cambridge"],"William Shakespeare was born in Stratford-upon-Avon."],
+["Who wrote the music for Jesus Christ Superstar (with Tim Rice)?","Andrew Lloyd Webber",["Gilbert and Sullivan","Handel","Elgar"],"Andrew Lloyd Webber, with Tim Rice, wrote Jesus Christ Superstar and Evita, and also Cats and The Phantom of the Opera."],
+["Who were the Huguenots?","Protestant refugees from France",["Irish nationalists","Viking settlers","Roman soldiers"],"Between 1680 and 1720 many Huguenot refugees came from France; they were Protestants persecuted for their religion."],
+["In the 19th century the UK produced more than half the world's supply of which materials?","Iron, coal and cotton cloth",["Silk only","Oil and gas","Steel only"],"British industry led the world; the UK produced more than half of the world's iron, coal and cotton cloth."],
+["Which landmark was built for the Millennium and remains part of New Year celebrations?","The London Eye",["Tower Bridge","Westminster Abbey","Big Ben"],"The London Eye was built as part of the UK's Millennium celebrations and remains important at New Year."],
+["Where did slaves mainly come from during the slave trade?","West Africa",["South America","Southeast Asia","North Africa only"],"Slaves came primarily from West Africa."],
+["Who introduced shampooing (Indian head massage) to Britain?","Sake Dean Mahomet",["Florence Nightingale","Emmeline Pankhurst","James Cook"],"Sake Dean Mahomet and his wife introduced shampooing, the Indian art of head massage, to Britain."],
+["Is it true you must register at your local electoral registration office to vote?","True",["False","Only in Scotland","Only for EU citizens"],"To vote you must register; the register is kept at the local electoral registration office (or council office)."],
+];
+
+// Drop any malformed slots from the bank
+QB=QB.filter(q=>Array.isArray(q)&&typeof q[0]==="string"&&q.length>=3);
+
+function explainQuestion(q){return q[3]||EXPLAIN[q[0]]||`The correct answer is <b>${q[1]}</b>. Link the question wording to this exact handbook fact and contrast it with the distractors.`}
+
+function topicFor(q){
+  if(!q||typeof q[0]!=="string") return "Culture & society";
+  const t=q[0].toLowerCase();
+  if(/roman|viking|king|queen|war|battle|tudor|victor|union|reform|magna|armada|cromwell|welfare|nhs|stonehenge|hastings|black death|agincourt|bosworth|trafalgar|waterloo|somme|britain|churchill|bevan|beveridge|suffrag|vote|elizabeth|henry|william|boudicca|hadrian|augustine|nelson|wellington|thatcher|falkland|brexit|eec|eu/.test(t))return"History";
+  if(/parliament|speaker|mp|msp|mla|government|governor|jury|canvass|commons|lords|holyrood|stormont|senedd|vote|election|democracy/.test(t))return"Government";
+  if(/invent|scient|engine|television|radar|web|atm|mri|concorde|watt|brunel|baird|turing|berners|goodfellow|mansfield|penicillin|steam|steel|bessemer/.test(t))return"Science & inventions";
+  if(/ireland|belfast|good friday|stormont|partition|republic|dublin/.test(t))return"Ireland";
+  if(/population|religion|language|currency|age|alcohol|christian|muslim|nation|england|scotland|wales|demographic|banknote|pound/.test(t))return"UK today";
+  return"Culture & society";
+}
+
+/* ===== UI helpers ===== */
+const $=x=>document.getElementById(x);
+let i=0;
+
+function show(n){
+  i=Math.max(0,Math.min(M.length-1,n));
+  const m=M[i],e=$("event");
+  e.classList.remove("swap");void e.offsetWidth;e.classList.add("swap");
+  $("era").textContent=m.era;
+  $("title").textContent=m.title;
+  $("date").textContent=m.year;
+  // Merge description + extra into one clean paragraph (no "More detail:" label)
+  const body=[m.desc,(m.extra||"").trim()].filter(Boolean);
+  // Avoid repeating if extra largely restates desc
+  let text=body[0]||"";
+  if(body[1] && body[1]!==body[0]){
+    // join with space if desc doesn't already end with extra content
+    if(!text.includes(body[1].slice(0,40))) text=text+(text.endsWith(".")?" ":" ")+body[1];
+  }
+  $("desc").textContent=text;
+  if($("extraDetail")) $("extraDetail").innerHTML="";
+  // Memory anchors: clearer labels
+  const labels=["See","Remember","Link"];
+  $("artifacts").innerHTML=(m.art||[]).map((x,j)=>`<div class="artifact-card"><b>${labels[j]||"Cue"}</b><br>${x}</div>`).join("");
+  $("populationBox").innerHTML=populationHTML(i);
+  $("pq").textContent=m.q[0];
+  $("pfeedback").innerHTML="";$("pfeedback").className="";
+  const opts=m.q[1].map((x,k)=>({x,k})).sort(()=>.5-Math.random());
+  $("popts").innerHTML=opts.map(o=>`<button class="opt" data-k="${o.k}">${o.x}</button>`).join("");
+  document.querySelectorAll("#popts .opt").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#popts .opt").forEach(x=>x.disabled=true);
+    const ok=+b.dataset.k===m.q[2];
+    b.classList.add(ok?"good":"bad");
+    if(!ok)document.querySelectorAll("#popts .opt").forEach(x=>{if(+x.dataset.k===m.q[2])x.classList.add("good")});
+    $("pfeedback").className="feedback "+(ok?"correct":"incorrect");
+    $("pfeedback").innerHTML=`<b>${ok?"Correct.":"Not quite. Correct answer: "+m.q[1][m.q[2]]}</b><br>${m.desc}<br><span class="note">Anchors: ${m.art.join(" · ")}</span>`;
+  });
+  document.querySelectorAll(".tick").forEach((t,k)=>t.classList.toggle("on",k===i));
+  const on=document.querySelector(".tick.on");if(on)on.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  $("prev").disabled=i===0;$("next").disabled=i===M.length-1;
+  const pts=[[390,420],[400,370],[410,320]];
+  $("mapArtifacts").innerHTML=m.art.slice(0,3).map((a,k)=>`<g transform="translate(${pts[k][0]},${pts[k][1]})"><text class="map-icon" x="-12" y="8">${ICONS[i%ICONS.length]}</text><text x="22" y="4" class="map-icon-label">${a}</text></g>`).join("");
+}
+
+$("ticks").innerHTML=M.map((m,k)=>`<div class="tick" data-i="${k}"><b>${m.year}</b><br>${m.title}</div>`).join("");
+document.querySelectorAll(".tick").forEach(t=>t.onclick=()=>show(+t.dataset.i));
+$("prev").onclick=()=>show(i-1);
+$("next").onclick=()=>show(i+1);
+
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.add("hidden"));
+  $(b.dataset.id).classList.remove("hidden");
+});
+
+/* ===== Exam engine ===== */
+
+/* ===== Progress + SRS + Adaptive + Timed (v10) ===== */
+const PROGRESS_KEY="litukAtlasProgressV10";
+const OLD_KEYS=["litukAtlasProgressV82","litukAtlasProgressV90"];
+
+function loadProgress(){
+  let raw=safeStorage.getItem(PROGRESS_KEY);
+  if(!raw){for(const k of OLD_KEYS){const o=safeStorage.getItem(k);if(o){raw=o;break;}}}
+  const base={attempts:[],topics:{},cards:{},streak:{count:0,lastDate:""},seen:{},activityDates:[],bestStreak:0,currentStreak:0};
+  try{
+    const d=JSON.parse(raw||"{}");
+    return Object.assign(base,d,{
+      attempts:d.attempts||[],topics:d.topics||{},cards:d.cards||{},
+      streak:d.streak||{count:0,lastDate:""},seen:d.seen||{},activityDates:d.activityDates||[],bestStreak:d.bestStreak||0,currentStreak:d.currentStreak||0
+    });
+  }catch(e){return base;}
+}
+function saveProgress(data){safeStorage.setItem(PROGRESS_KEY,JSON.stringify(data));}
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function touchActivity(){
+  const data=loadProgress();
+  const t=todayStr();
+  if(!data.activityDates.includes(t)){data.activityDates.push(t);data.activityDates=data.activityDates.slice(-90);}
+  if(data.streak.lastDate!==t){
+    const y=new Date();y.setDate(y.getDate()-1);
+    const yStr=y.getFullYear()+"-"+String(y.getMonth()+1).padStart(2,"0")+"-"+String(y.getDate()).padStart(2,"0");
+    data.streak.count=(data.streak.lastDate===yStr)?(data.streak.count||0)+1:1;
+    data.streak.lastDate=t;
+  }
+  saveProgress(data);return data;
+}
+function cardKey(q){return (q&&typeof q[0]==="string")?q[0]:"";}
+function getCard(q){const data=loadProgress();return data.cards[cardKey(q)]||{ef:2.5,interval:0,reps:0,due:0,last:0};}
+function scheduleCard(q,grade){
+  if(!q||typeof q[0]!=="string") return null;
+  const data=loadProgress();const k=cardKey(q);
+  let c=data.cards[k]||{ef:2.5,interval:0,reps:0,due:0,last:0};
+  const now=Date.now();
+  if(grade===0){c.reps=0;c.interval=0;c.due=now+10*60*1000;}
+  else{
+    if(c.reps===0)c.interval=1;
+    else if(c.reps===1)c.interval=grade===1?2:(grade===2?3:4);
+    else{let mult=c.ef;if(grade===1)mult=Math.max(1.2,c.ef-0.15);if(grade===3)mult=c.ef+0.15;c.interval=Math.max(1,Math.round(c.interval*mult));}
+    c.reps++;c.ef=Math.max(1.3,c.ef+(0.1-(3-grade)*(0.08+(3-grade)*0.02)));c.due=now+c.interval*24*60*60*1000;
+  }
+  c.last=now;data.cards[k]=c;data.seen[k]=true;saveProgress(data);touchActivity();return c;
+}
+function dueCards(){const now=Date.now(),data=loadProgress();return QB.filter(q=>q&&typeof q[0]==="string"&&data.cards[cardKey(q)]&&data.cards[cardKey(q)].due<=now);}
+function newCards(limit=20){const data=loadProgress();return QB.filter(q=>q&&typeof q[0]==="string"&&!data.cards[cardKey(q)]).slice(0,limit);}
+function learningCards(){const now=Date.now(),data=loadProgress();return QB.filter(q=>{if(!q||typeof q[0]!=="string")return false;const c=data.cards[cardKey(q)];return c&&c.reps>0&&c.reps<3&&c.due>now;});}
+
+function makeAdaptiveSet(n=24){
+  const data=loadProgress();const topicW={};
+  Object.entries(data.topics).forEach(([t,v])=>{const acc=v.seen?v.correct/v.seen:0.5;topicW[t]=1.5-acc;});
+  const recentMiss=new Set();
+  (data.attempts||[]).slice(-5).forEach(a=>{(a.missed||[]).forEach(m=>recentMiss.add(m));});
+  const scored=QB.filter(q=>q&&typeof q[0]==="string").map(q=>{
+    const t=topicFor(q);let w=topicW[t]||1;
+    if(recentMiss.has(q[0]))w+=1.2;
+    if(!data.seen[cardKey(q)])w+=0.4;
+    w*=(0.85+Math.random()*0.3);
+    return {q,w};
+  });
+  scored.sort((a,b)=>b.w-a.w);
+  return seededShuffle(scored.slice(0,Math.min(n*2,scored.length)).map(x=>x.q),Date.now()).slice(0,n);
+}
+
+function seededShuffle(arr,seed){
+  let a=[...arr],x=(seed+1)*2654435761>>>0;
+  for(let j=a.length-1;j>0;j--){x=(x*1664525+1013904223)>>>0;const k=x%(j+1);[a[j],a[k]]=[a[k],a[j]]}
+  return a;
+}
+function makeSet(s){return seededShuffle(QB,s+17).slice(0,24)}
+
+let ex=0,qi=0,score=0,answered=false,wrongAnswers=[],reviewQueue=null,currentSet=[];
+let examMode="mock",timerId=null,timeLeft=0,timedOut=false;
+function clearTimer(){if(timerId){clearInterval(timerId);timerId=null;}}
+
+function start(s,mode){
+  clearTimer();
+  examMode=mode||"mock";
+  ex=typeof s==="number"?s:0;qi=score=0;wrongAnswers=[];reviewQueue=null;timedOut=false;answered=false;
+  if(examMode==="focus") currentSet=makeAdaptiveSet(24);
+  else if(examMode==="timed") currentSet=seededShuffle(QB,Date.now()+ex).slice(0,24);
+  else currentSet=makeSet(ex);
+  if(examMode==="timed"){
+    timeLeft=45*60;
+    timerId=setInterval(()=>{timeLeft--;updateTimerUI();if(timeLeft<=0){clearTimer();timedOut=true;finish();}},1000);
+  }
+  // switch to exam view
+  if(typeof openView==="function") openView("examView");
+  else {
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="examView"));
+    document.querySelectorAll(".appnav button").forEach(b=>b.classList.toggle("on",b.dataset.view==="examView"));
+  }
+  renderQ();
+  touchActivity();
+}
+function updateTimerUI(){
+  const el=$("timerDisplay");if(!el)return;
+  const m=Math.floor(timeLeft/60),s=timeLeft%60;
+  el.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  const bar=$("timerBar");
+  if(bar){bar.classList.toggle("warn",timeLeft<=600&&timeLeft>120);bar.classList.toggle("crit",timeLeft<=120);}
+}
+function renderQ(){
+  if(!$("exam"))return;
+  const q=currentSet[qi];
+  if(!q){finish();return;}
+  const arr=[q[1],...q[2]].map((x,k)=>({x,k})).sort(()=>.5-Math.random());
+  const isTimed=examMode==="timed";
+  const meta=isTimed
+    ? `<div class="timer-bar" id="timerBar"><span>⏱ Official timed exam</span><span class="clock" id="timerDisplay">--:--</span><span>Q ${qi+1}/${currentSet.length}</span></div>`
+    : `<div class="question-meta"><div class="eyebrow">${examMode==="focus"?"Focus set":(examMode==="custom"?"Custom quiz":"Mock "+(ex+1))} · Question ${qi+1}/${currentSet.length}</div><b>${topicFor(q)}</b></div>`;
+  $("exam").innerHTML=`${meta}<h3>${q[0]}</h3><div class="opts">${arr.map(o=>`<button class="opt" data-k="${o.k}">${o.x}</button>`).join("")}</div><div id="examFeedback"></div>${isTimed?"":"<p>Score so far: "+score+"</p>"}`;
+  if(isTimed) updateTimerUI();
+  document.querySelectorAll("#exam .opt").forEach(b=>b.onclick=()=>{
+    if(answered)return;answered=true;
+    document.querySelectorAll("#exam .opt").forEach(x=>x.disabled=true);
+    const good=+b.dataset.k===0;
+    if(good){
+      score++;b.classList.add("good");
+      const _d=loadProgress();_d.currentStreak=(_d.currentStreak||0)+1;_d.bestStreak=Math.max(_d.bestStreak||0,_d.currentStreak);saveProgress(_d);
+    } else {
+      b.classList.add("bad");
+      const _d=loadProgress();_d.currentStreak=0;saveProgress(_d);
+      if(!isTimed) document.querySelectorAll("#exam .opt").forEach(x=>{if(+x.dataset.k===0)x.classList.add("good")});
+      wrongAnswers.push({q:q[0],chosen:b.textContent,correct:q[1],explain:explainQuestion(q),topic:topicFor(q),raw:q});
+    }
+    const data=loadProgress();data.seen[cardKey(q)]=true;saveProgress(data);
+    if(isTimed){
+      setTimeout(()=>{answered=false;if(++qi<currentSet.length)renderQ();else finish();},320);
+      return;
+    }
+    const fb=$("examFeedback");
+    fb.className="feedback "+(good?"correct":"incorrect");
+    fb.innerHTML=`<b>${good?"Correct.":"Not quite. The correct answer is "+q[1]+"."}</b><br>${explainQuestion(q)}
+      <div class="rating-row">
+        <button type="button" class="again" data-g="0">Again</button>
+        <button type="button" class="hard" data-g="1">Hard</button>
+        <button type="button" class="good" data-g="2">Good</button>
+        <button type="button" class="easy" data-g="3">Easy</button>
+      </div>
+      <p class="note" style="margin-top:8px">Rate to schedule the next spaced-repetition review.</p>`;
+    fb.querySelectorAll(".rating-row button").forEach(btn=>{
+      btn.onclick=()=>{scheduleCard(q,+btn.dataset.g);answered=false;if(++qi<currentSet.length)renderQ();else finish();};
+    });
+  });
+}
+function saveAttempt(){
+  const data=loadProgress();
+  const missed=wrongAnswers.map(w=>w.q);
+  data.attempts.push({date:new Date().toISOString(),mock:examMode==="timed"?"Timed":(examMode==="focus"?"Focus":(examMode==="custom"?"Custom":(ex+1))),score,total:currentSet.length,mode:examMode,missed});
+  currentSet.forEach(q=>{
+    if(!q||typeof q[0]!=="string") return;
+    const t=topicFor(q);
+    data.topics[t]=data.topics[t]||{seen:0,correct:0};
+    data.topics[t].seen++;
+    if(!missed.includes(q[0])) data.topics[t].correct++;
+    data.seen[cardKey(q)]=true;
+  });
+  data.attempts=data.attempts.slice(-40);
+  saveProgress(data);touchActivity();
+  if(window.AtlasApp&&window.AtlasApp.renderDashboard) window.AtlasApp.renderDashboard();
+}
+function finish(){
+  clearTimer();
+  saveAttempt();
+  const pass=score/currentSet.length>=0.75;
+  let review="";
+  if(wrongAnswers.length){
+    review=`<div class="wrong-review"><h3>Review ${wrongAnswers.length} missed</h3>`+
+      wrongAnswers.map(w=>`<div class="card" style="margin:8px 0"><b>${w.q}</b><br>You chose: ${w.chosen}<br><b>Correct:</b> ${w.correct}<br>${w.explain}</div>`).join("")+
+      `<button class="btn" id="rapidMistakes">⚡ Rapid Recall these</button></div>`;
+  }
+  const timedNote=examMode==="timed"?(timedOut?"<p><b>Time expired.</b> Remaining questions counted as incorrect.</p>":"<p>Timed exam finished under official-style conditions (no mid-question feedback).</p>"):"";
+  $("exam").innerHTML=`<div class="score">${score}/${currentSet.length} · ${Math.round(score/currentSet.length*100)}% · ${pass?"PASS":"NOT YET"}</div>
+    ${timedNote}
+    <p>${pass?"You reached the 75% mark.":"Review the explanations, then use SRS Review or Focus Practice. Target is 75%."}</p>
+    ${review}
+    <div class="exam-end-actions">
+      <button class="btn" onclick="start(${ex},'${examMode}')">Retry this set</button>
+      <button class="btn" onclick="openView('srsView')">Open SRS Review</button>
+      <button class="btn" onclick="openView('focusView')">Focus Practice</button>
+    </div>`;
+  if(wrongAnswers.length && $("rapidMistakes")) $("rapidMistakes").onclick=startMistakeReview;
+}
+function startMistakeReview(){
+  reviewQueue=wrongAnswers.map(w=>w.raw);
+  currentSet=seededShuffle(reviewQueue,Date.now());
+  wrongAnswers=[];qi=score=0;examMode="mock";clearTimer();renderQ();
+}
+$("examlist").innerHTML=
+  Array.from({length:20},(_,s)=>`<button class="btn" onclick="start(${s},'mock')">Mock ${s+1} · 24 questions</button>`).join("")+
+  `<button class="btn" style="background:#0f2744;color:#fff;margin-top:12px" onclick="start(0,'timed')">⏱ Official Timed Exam (45 min · no mid feedback)</button>`;
+
+/* ===== View routing & atlas / flash / demo / readiness ===== */
+(function(){
+  const main=document.querySelector("main.wrap"), kids=[...main.children];
+  const timeV=$("timeView"),todayV=$("todayView"),examV=$("examView");
+  kids.forEach(el=>{
+    if(el.tagName==="NAV"||el.classList.contains("view"))return;
+    const h=el.querySelector&&el.querySelector("h2");
+    const t=h?h.textContent:"";
+    if(t.startsWith("UK Today"))todayV.appendChild(el);
+    else if(t.startsWith("20 mocks")||t.startsWith("12 full mock"))examV.appendChild(el);
+    else if(!el.classList.contains("view"))timeV.appendChild(el);
+  });
+  // move source note
+
+  function openView(id){
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===id));
+    document.querySelectorAll(".appnav button").forEach(b=>b.classList.toggle("on",b.dataset.view===id));
+    window.scrollTo({top:120,behavior:"smooth"});
+    if(id==="readyView" && window.AtlasApp && window.AtlasApp.renderDashboard) window.AtlasApp.renderDashboard();
+    if(id==="srsView") renderSRSPanel();
+    if(id==="focusView") renderFocusPanel();
+    if(id==="customView") renderCustomPanel();
+  }
+  window.openView=openView;
+  document.querySelectorAll(".appnav button").forEach(b=>b.onclick=()=>openView(b.dataset.view));
+
+  // Atlas cards
+  $("atlasCards").innerHTML=M.map((m,k)=>`<article class="atlasCard"><div class="date">${m.year}</div><h3>${m.title}</h3><p>${m.desc}</p><div class="chips">${m.art.slice(0,3).map((a,j)=>`<span class="chip">${j===0?ICONS[k%ICONS.length]:"◆"} ${a}</span>`).join("")}</div><button class="openPeriod" data-i="${k}">Open period</button></article>`).join("");
+  document.querySelectorAll(".openPeriod").forEach(b=>b.onclick=()=>{openView("timeView");show(+b.dataset.i)});
+
+  // Flashcards
+  const extra=[
+    {cat:"UK Today",icon:"🏛️",cue:"650",ans:"MPs in the House of Commons",why:"Westminster representation"},
+    {cat:"UK Today",icon:"🔨",cue:"Speaker",ans:"Neutral chair of Commons debates",why:"Chosen by MPs in a secret ballot"},
+    {cat:"UK Today",icon:"🏴",cue:"129",ans:"Members of the Scottish Parliament",why:"MSPs meet at Holyrood"},
+    {cat:"UK Today",icon:"🇬🇧",cue:"90",ans:"Members of the Northern Ireland Assembly",why:"MLAs meet at Stormont"},
+    {cat:"Ireland",icon:"🍀",cue:"1921–22",ans:"Partition of Ireland",why:"Six northern counties remained in the UK"},
+    {cat:"Ireland",icon:"🕊️",cue:"1998",ans:"Good Friday Agreement",why:"Northern Ireland peace process"},
+    {cat:"Inventions",icon:"📺",cue:"John Logie Baird",ans:"Television",why:"Handbook association with early TV"},
+    {cat:"Inventions",icon:"📡",cue:"Watson-Watt",ans:"Radar",why:"Detection by radio waves"},
+    {cat:"Inventions",icon:"✈️",cue:"Frank Whittle",ans:"Jet engine",why:"Developed in Britain"},
+    {cat:"Inventions",icon:"🌐",cue:"Tim Berners-Lee",ans:"World Wide Web",why:"Information transferred via the web in 1990"},
+    {cat:"Inventions",icon:"🛫",cue:"Concorde",ans:"Britain and France",why:"First flight 1969; passenger service 1976"},
+    {cat:"Sport & Ages",icon:"⛳",cue:"St Andrews",ans:"Home of golf",why:"Scotland"},
+    {cat:"Sport & Ages",icon:"🎾",cue:"Wimbledon",ans:"Major tennis championship",why:"London"},
+    {cat:"Sport & Ages",icon:"🚣",cue:"Steve Redgrave",ans:"Five consecutive Olympic rowing golds",why:"Olympic memory anchor"},
+    {cat:"Sport & Ages",icon:"🛵",cue:"16",ans:"Moped; beer or wine with a meal under stated conditions",why:"Minimum-age memory cue"},
+    {cat:"Sport & Ages",icon:"🚗",cue:"17",ans:"Drive a car in the study source",why:"Minimum-age memory cue"},
+    {cat:"Sport & Ages",icon:"🗳️",cue:"18",ans:"Vote and stand for public office",why:"Adult civic participation"},
+    {cat:"Demography",icon:"👥",cue:"2010",ans:"Just over 62 million (handbook)",why:"Population series"},
+    {cat:"Demography",icon:"🏴",cue:"≈84%",ans:"England’s approximate UK population share",why:"Handbook memory anchor"},
+    {cat:"Demography",icon:"⛪",cue:"2009 survey",ans:"Christian 70%, no religion 21%",why:"Citizenship Survey figures in the handbook"}
+  ];
+  const history=M.map((m,k)=>({cat:"History",icon:ICONS[k%ICONS.length],cue:m.year,ans:m.title,why:m.art.join(" · ")}));
+  const cards=[...history,...extra];
+  let cat="History",rapid=false;
+  const cats=["History","UK Today","Ireland","Inventions","Sport & Ages","Demography"];
+  $("flashToolbar").innerHTML=cats.map(c=>`<button data-cat="${c}">${c}</button>`).join("");
+  function renderCards(){
+    document.querySelectorAll("#flashToolbar button").forEach(b=>b.classList.toggle("on",b.dataset.cat===cat));
+    $("flashGrid").innerHTML=cards.filter(x=>x.cat===cat).map(x=>`<article class="flash"><div class="flashInner"><div class="flashFace"><div class="flashIcon">${x.icon}</div><div class="flashCue">${rapid?"?":x.cue}</div><div class="flashHint">Click to reveal</div></div><div class="flashFace flashBack"><div class="flashIcon">${x.icon}</div><h3>${x.ans}</h3><p>${x.why}</p></div></div></article>`).join("");
+    document.querySelectorAll(".flash").forEach(c=>c.onclick=()=>c.classList.toggle("flipped"));
+  }
+  document.querySelectorAll("#flashToolbar button").forEach(b=>b.onclick=()=>{cat=b.dataset.cat;renderCards()});
+  $("rapidBtn").onclick=()=>{rapid=!rapid;$("rapidBtn").textContent=rapid?"⚡ Rapid Recall: ON":"⚡ Rapid Recall";renderCards()};
+  renderCards();
+
+  // Demographics interactive
+  const maxPop=67.6;
+  $("popChart").innerHTML=POP.map(p=>{
+    const h=Math.max(8,(p.v/maxPop)*140);
+    return `<div class="bar-item" title="${p.y}: ${p.l}"><div class="bar-val">${p.v}m</div><div class="bar-fill" style="height:${h}px"></div><div class="bar-label">${p.y}</div></div>`;
+  }).join("");
+  const nations=[{n:"England",p:84,c:"#1261a0"},{n:"Scotland",p:8.2,c:"#188977"},{n:"Wales",p:5,c:"#f4b942"},{n:"N. Ireland",p:2.8,c:"#bd3d4f"}];
+  $("nationBars").innerHTML=nations.map(x=>`<div class="nb"><b>${x.n}</b><div class="nb-track"><span style="width:${x.p}%;background:${x.c}"></span></div><span>${x.p}%</span></div>`).join("");
+  const rel=[{n:"Christian",p:"70%"},{n:"No religion",p:"21%"},{n:"Muslim",p:"4%"},{n:"Hindu",p:"2%"},{n:"Sikh",p:"1%"},{n:"Jewish / Buddhist",p:"<0.5% each"},{n:"Other",p:"2%"}];
+  $("religionChips").innerHTML=rel.map(r=>`<span class="pie-chip"><b>${r.n}</b> · ${r.p}</span>`).join("");
+
+  // Readiness
+  
+  function computeBadges(data){
+    const a=data.attempts||[];
+    const scores=a.map(x=>x.score/x.total);
+    const best=scores.length?Math.max(...scores):0;
+    const coverage=Object.keys(data.seen||{}).length/Math.max(1,QB.length);
+    // consecutive correct: track best streak from attempt scores is weak; use stored or approximate from perfect mocks
+    let bestStreak=data.bestStreak||0;
+    // also count consecutive perfect-question runs if stored
+    const badges=[
+      {id:"p75",icon:"🥉",title:"First 75%",desc:"Score ≥75% on any mock",ok:best>=0.75},
+      {id:"p90",icon:"🥈",title:"First 90%",desc:"Score ≥90% on any mock",ok:best>=0.90},
+      {id:"p100",icon:"🥇",title:"Perfect mock",desc:"100% on any 24-question set",ok:a.some(x=>x.score===x.total&&x.total>=20)},
+      {id:"s20",icon:"🔥",title:"20 in a row",desc:"20 consecutive correct",ok:bestStreak>=20},
+      {id:"s50",icon:"⚡",title:"50 in a row",desc:"50 consecutive correct",ok:bestStreak>=50},
+      {id:"s100",icon:"💎",title:"100 in a row",desc:"100 consecutive correct",ok:bestStreak>=100},
+      {id:"c10",icon:"📘",title:"10% coverage",desc:"Seen 10% of the bank",ok:coverage>=0.10},
+      {id:"c25",icon:"📗",title:"25% coverage",desc:"Seen 25% of the bank",ok:coverage>=0.25},
+      {id:"c50",icon:"📙",title:"50% coverage",desc:"Seen 50% of the bank",ok:coverage>=0.50},
+      {id:"c75",icon:"📕",title:"75% coverage",desc:"Seen 75% of the bank",ok:coverage>=0.75},
+      {id:"c100",icon:"🏆",title:"Full bank",desc:"Seen every question",ok:coverage>=0.99},
+    ];
+    return badges;
+  }
+function renderDashboard(){
+    const host=$("readinessDashboard");
+    if(!host) return;
+    const data=loadProgress();
+    const a=data.attempts||[];
+    const seenCount=Object.keys(data.seen||{}).length;
+    const coverage=Math.round(seenCount/Math.max(1,QB.length)*100);
+    const streak=data.streak||{count:0};
+    if(!a.length){
+      host.innerHTML=`<div class="review-banner"><b>No exams completed yet.</b> Complete a mock, timed exam or focus set to build analytics.</div>
+        <div class="analytics-grid">
+          <div class="stat-card"><div class="n">0</div><b>Attempts</b></div>
+          <div class="stat-card"><div class="n">${coverage}%</div><b>Bank coverage</b></div>
+          <div class="stat-card"><div class="n">${streak.count||0}</div><b>Day streak</b></div>
+          <div class="stat-card"><div class="n">${Object.keys(data.cards||{}).length}</div><b>SRS cards</b></div>
+        </div>`;
+      return;
+    }
+    const best=Math.max(...a.map(x=>x.score/x.total));
+    const avg=a.reduce((z,x)=>z+x.score/x.total,0)/a.length;
+    const recent=a.slice(-3);
+    const trend=recent.reduce((z,x)=>z+x.score/x.total,0)/recent.length;
+    const ready=Math.round((best*.30+avg*.30+trend*.25+(coverage/100)*.15)*100);
+    const topics=Object.entries(data.topics||{}).map(([name,v])=>({name,p:v.seen?Math.round(v.correct/v.seen*100):0,seen:v.seen||0})).sort((x,y)=>x.p-y.p);
+    const weekAgo=Date.now()-7*24*60*60*1000;
+    const weekAttempts=a.filter(x=>new Date(x.date).getTime()>=weekAgo).length;
+    host.innerHTML=`
+      <div style="margin-bottom:10px"><span class="streak-pill">🔥 ${streak.count||0} day streak</span></div>
+      <div class="analytics-grid">
+        <div class="stat-card"><div class="n">${a.length}</div><b>Total attempts</b></div>
+        <div class="stat-card"><div class="n">${Math.round(best*100)}%</div><b>Best score</b></div>
+        <div class="stat-card"><div class="n">${Math.round(avg*100)}%</div><b>Average</b></div>
+        <div class="stat-card"><div class="n">${ready}%</div><b>${ready>=75?"Test-ready range":"Building readiness"}</b></div>
+        <div class="stat-card"><div class="n">${coverage}%</div><b>Bank coverage</b><div class="coverage-meter"><span style="width:${coverage}%"></span></div></div>
+        <div class="stat-card"><div class="n">${weekAttempts}/5</div><b>This week (goal 5)</b></div>
+        <div class="stat-card"><div class="n">${Object.keys(data.cards||{}).length}</div><b>SRS deck</b></div>
+        <div class="stat-card"><div class="n">${dueCards().length}</div><b>Cards due now</b></div>
+      </div>
+      <div class="card"><h3>Readiness meter</h3>
+        <div class="readiness-meter"><span style="width:${Math.min(100,ready)}%"></span></div>
+        <p class="note">Composite of best, average, recent trend and bank coverage. Study indicator only — not a guarantee of the official result.</p>
+      </div>
+      <div class="card"><h3>Topic mastery map</h3>
+        <div class="mastery-grid">${topics.length?topics.map(t=>`<div class="mastery-cell ${t.p<60?"low":t.p<80?"mid":"high"}"><div class="pct">${t.p}%</div><b>${t.name}</b><div class="note">${t.seen} seen</div></div>`).join(""):"<p class='note'>No topic data yet.</p>"}</div>
+        <p class="note">Red / amber topics should be prioritised in Focus Practice and SRS.</p>
+      </div>
+      <div class="card"><h3>Badges</h3>
+        <div class="badge-grid">${computeBadges(data).map(b=>`<div class="badge ${b.ok?"earned":""}"><div class="icon">${b.icon}</div><b>${b.title}</b><div class="note">${b.desc}</div></div>`).join("")}</div>
+        <p class="note">Greyed badges are still locked. Consecutive-correct streaks update as you answer in mocks, focus and custom quizzes.</p>
+      </div>
+      <div class="card"><h3>Recent history</h3>
+        <table class="history-table"><thead><tr><th>Date</th><th>Mode</th><th>Score</th><th>Result</th></tr></thead>
+        <tbody>${a.slice(-12).reverse().map(x=>`<tr><td>${new Date(x.date).toLocaleDateString()}</td><td>${x.mock}</td><td>${x.score}/${x.total}</td><td>${x.score/x.total>=.75?"Pass range":"Review"}</td></tr>`).join("")}</tbody></table>
+      </div>`;
+  }
+  
+  
+  function renderCustomPanel(){
+    const el=$("customPanel"); if(!el) return;
+    const topics=["History","Government","Science & inventions","Ireland","UK today","Culture & society"];
+    const counts=[10,15,20,24,30];
+    el.innerHTML=`<div class="card" style="background:#f7fafc">
+      <h3>Topics</h3>
+      <div class="srs-bar" id="customTopics">${topics.map(t=>`<label style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid #c5d4e8;border-radius:999px;background:#fff;cursor:pointer"><input type="checkbox" value="${t}" checked> ${t}</label>`).join("")}</div>
+      <h3 style="margin-top:14px">Number of questions</h3>
+      <div class="srs-bar" id="customCount">${counts.map((n,i)=>`<button type="button" class="btn ${n===24?"on":""}" data-n="${n}" style="${n===24?"background:#173f6d;color:#fff":""}">${n}</button>`).join("")}</div>
+      <p class="note" id="customAvail"></p>
+      <button class="btn" id="customStart" style="margin-top:12px">Start custom quiz</button>
+    </div>`;
+    let chosen=24;
+    const updateAvail=()=>{
+      const sel=[...el.querySelectorAll("#customTopics input:checked")].map(x=>x.value);
+      const pool=QB.filter(q=>q&&typeof q[0]==="string"&&sel.includes(topicFor(q)));
+      $("customAvail").textContent=`${pool.length} questions available in selected topics · will draw ${Math.min(chosen,pool.length)}.`;
+      return pool;
+    };
+    updateAvail();
+    el.querySelectorAll("#customTopics input").forEach(c=>c.onchange=updateAvail);
+    el.querySelectorAll("#customCount button").forEach(b=>b.onclick=()=>{
+      chosen=+b.dataset.n;
+      el.querySelectorAll("#customCount button").forEach(x=>{x.classList.remove("on");x.style.background="";x.style.color="";});
+      b.classList.add("on");b.style.background="#173f6d";b.style.color="#fff";
+      updateAvail();
+    });
+    $("customStart").onclick=()=>{
+      const pool=updateAvail();
+      if(pool.length<5){alert("Select more topics — fewer than 5 matching questions.");return;}
+      const n=Math.min(chosen,pool.length);
+      currentSet=seededShuffle(pool,Date.now()).slice(0,n);
+      examMode="custom";ex=0;qi=score=0;wrongAnswers=[];answered=false;clearTimer();
+      openView("examView");
+      renderQ();
+      touchActivity();
+    };
+  }
+
+function renderFocusPanel(){
+    const el=$("focusPanel"); if(!el) return;
+    const data=loadProgress();
+    const topics=Object.entries(data.topics||{}).map(([name,v])=>({name,p:v.seen?Math.round(v.correct/v.seen*100):0,seen:v.seen||0})).sort((a,b)=>a.p-b.p);
+    const weak=topics.filter(t=>t.seen>=2).slice(0,4);
+    el.innerHTML=`<p>This set prioritises topics where your accuracy is lowest and questions you have missed recently. After each answer, rate it for spaced repetition.</p>
+      <div class="mastery-grid" style="margin:12px 0">${topics.length?topics.map(t=>`<div class="mastery-cell ${t.p<60?"low":t.p<80?"mid":"high"}"><div class="pct">${t.p}%</div><b>${t.name}</b><div class="note">${t.seen} seen</div></div>`).join(""):"<p class='note'>Complete a mock first to build topic stats.</p>"}</div>
+      <button class="btn" onclick="start(0,'focus')">Start adaptive 24-question Focus set</button>
+      ${weak.length?`<p class="note">Current priority topics: ${weak.map(w=>w.name).join(", ")}</p>`:""}`;
+  }
+  function renderSRSPanel(){
+    const el=$("srsPanel"); if(!el) return;
+    const due=dueCards(), neu=newCards(30), learn=learningCards();
+    el.innerHTML=`<div class="analytics-grid">
+      <div class="stat-card"><div class="n">${due.length}</div><b>Due now</b></div>
+      <div class="stat-card"><div class="n">${neu.length}</div><b>New available</b></div>
+      <div class="stat-card"><div class="n">${learn.length}</div><b>Learning</b></div>
+      <div class="stat-card"><div class="n">${Object.keys(loadProgress().cards||{}).length}</div><b>In SRS deck</b></div>
+    </div>
+    <div class="srs-bar">
+      <button class="btn" id="srsDueBtn">Review due ${due.length?`<span class="due-badge">${due.length}</span>`:""}</button>
+      <button class="btn" id="srsNewBtn">Study new (up to 10)</button>
+      <button class="btn" id="srsMixBtn">Mixed session (due + new)</button>
+    </div>
+    <div id="srsSession"></div>
+    <p class="note">Ratings: <b>Again</b> = show soon · <b>Hard</b> = shorter interval · <b>Good</b> = normal · <b>Easy</b> = longer interval.</p>`;
+    $("srsDueBtn").onclick=()=>runSRSSession(due.length?due:neu.slice(0,10));
+    $("srsNewBtn").onclick=()=>runSRSSession(neu.slice(0,10));
+    $("srsMixBtn").onclick=()=>runSRSSession(seededShuffle([...due,...neu.slice(0,8)],Date.now()).slice(0,15));
+  }
+  let srsQueue=[], srsIdx=0, srsFlipped=false;
+  function runSRSSession(list){
+    srsQueue=list; srsIdx=0; srsFlipped=false;
+    const host=$("srsSession");
+    if(!srsQueue.length){ host.innerHTML="<p>No cards in this queue. Do a mock or focus set first, then rate answers so cards enter the deck.</p>"; return; }
+    showSRSCard();
+  }
+  function showSRSCard(){
+    const host=$("srsSession");
+    if(srsIdx>=srsQueue.length){
+      host.innerHTML=`<div class="score">Session complete · ${srsQueue.length} cards reviewed</div><button class="btn" onclick="renderSRSPanel()">Back to queues</button>`;
+      return;
+    }
+    const q=srsQueue[srsIdx];
+    host.innerHTML=`<div class="card"><div class="eyebrow">Card ${srsIdx+1}/${srsQueue.length} · ${topicFor(q)}</div>
+      <h3>${q[0]}</h3>
+      <div id="srsAnswer" style="display:${srsFlipped?"block":"none"};margin:12px 0"><b>${q[1]}</b><br>${explainQuestion(q)}</div>
+      ${srsFlipped?`<div class="rating-row">
+        <button type="button" class="again" data-g="0">Again</button>
+        <button type="button" class="hard" data-g="1">Hard</button>
+        <button type="button" class="good" data-g="2">Good</button>
+        <button type="button" class="easy" data-g="3">Easy</button>
+      </div>`:`<button class="btn" id="srsFlip">Show answer</button>`}
+    </div>`;
+    if(!srsFlipped){
+      $("srsFlip").onclick=()=>{srsFlipped=true;showSRSCard();};
+    }else{
+      host.querySelectorAll(".rating-row button").forEach(btn=>{
+        btn.onclick=()=>{scheduleCard(q,+btn.dataset.g);srsIdx++;srsFlipped=false;showSRSCard();};
+      });
+    }
+  }
+  window.renderSRSPanel=renderSRSPanel;
+  window.renderFocusPanel=renderFocusPanel;
+  window.renderCustomPanel=renderCustomPanel;
+
+window.AtlasApp.renderDashboard=renderDashboard;
+  $("resetProgress").onclick=()=>{safeStorage.removeItem(PROGRESS_KEY);OLD_KEYS.forEach(k=>safeStorage.removeItem(k));if(window.AtlasApp&&window.AtlasApp.renderDashboard)window.AtlasApp.renderDashboard();};
+  window.AtlasApp.renderDashboard();
+})();
+
+
+  // PWA: register a minimal service worker when served over http(s)
+  if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+    const swCode=`self.addEventListener('install',e=>{self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});
+self.addEventListener('fetch',e=>{e.respondWith(caches.open('lituk-v11').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(e.request.method==='GET'&&resp.ok)c.put(e.request,resp.clone());return resp;}).catch(()=>r)));});`;
+    const blob=new Blob([swCode],{type:"text/javascript"});
+    const swUrl=URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }
+  // Install prompt
+  let deferredPrompt=null;
+  window.addEventListener("beforeinstallprompt",e=>{
+    e.preventDefault();deferredPrompt=e;
+    const b=$("pwaInstallBtn");if(b){b.style.display="inline-block";}
+  });
+  window.AtlasApp=window.AtlasApp||{};
+  window.AtlasApp.installPWA=async function(){
+    if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;const b=$("pwaInstallBtn");if(b)b.style.display="none";}
+    else alert("To install: open this file via a local web server (or host it), then use the browser Install / Add to Home Screen option. Direct file:// opens cannot register a full PWA in most browsers.");
+  };
+
+  show(0);
+</script>
+</body>
+</html>
