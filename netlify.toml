@@ -1,8 +1,6 @@
 [build]
-  # Temporary safe config: publish repo root so CI never fails on missing app/index.html.
-  # App shell with auth is deployed via Netlify upload until app/index.html is in git.
-  publish = "."
-  command = "mkdir -p app && cp -f index.html app/index.html && echo 'published root + app mirror'"
+  publish = "dist"
+  command = "node scripts/build.mjs"
   functions = "netlify/functions"
 
 [functions]
