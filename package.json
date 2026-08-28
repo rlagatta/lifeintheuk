@@ -1,0 +1,14 @@
+{
+  "name": "life-in-the-uk-atlas",
+  "version": "0.12.0",
+  "private": true,
+  "description": "Life in the UK Atlas — study aid for citizenship & ILR",
+  "scripts": {
+    "dev": "vite --config app/vite.config.js",
+    "build": "node scripts/build.mjs",
+    "preview": "vite preview --config app/vite.config.js"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
