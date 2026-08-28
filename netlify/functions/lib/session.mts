@@ -4,8 +4,20 @@ const COOKIE = "atlas_session";
 const TOKEN_TTL_MS = 15 * 60 * 1000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
+function envGet(key: string): string {
+  try {
+    const v = Netlify.env.get(key);
+    if (v != null && String(v).length) return String(v);
+  } catch { /* ignore */ }
+  try {
+    const v = process.env[key];
+    if (v != null && String(v).length) return String(v);
+  } catch { /* ignore */ }
+  return "";
+}
+
 function secret(): string {
-  const s = Netlify.env.get("SESSION_SECRET");
+  const s = envGet("SESSION_SECRET");
   if (!s || s.length < 16) return "dev-only-change-me-atlas-session-secret";
   return s;
 }
@@ -19,13 +31,19 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function allowlistEmails(): Set<string> {
-  const raw = Netlify.env.get("ALLOWLIST_EMAILS") || "";
-  return new Set(raw.split(/[,;\s]+/).map((e) => normalizeEmail(e)).filter(Boolean));
+  const raw = envGet("ALLOWLIST_EMAILS");
+  return new Set(
+    raw
+      .split(/[,;\n\r]+/)
+      .map((e) => normalizeEmail(e))
+      .filter((e) => e.includes("@"))
+  );
 }
 
 export function entitlementForEmail(email: string) {
   const e = normalizeEmail(email);
-  if (allowlistEmails().has(e)) {
+  const list = allowlistEmails();
+  if (list.has(e)) {
     return { plan: "pass", expires_at: null as number | null, sku: "lifetime", source: "allowlist" };
   }
   return { plan: "free", expires_at: null as number | null, sku: null as string | null, source: "signup" };
@@ -91,4 +109,8 @@ export function newMagicToken(): string {
 
 export function magicTtlMs(): number {
   return TOKEN_TTL_MS;
+}
+
+export function siteBase(): string {
+  return (envGet("URL") || envGet("DEPLOY_PRIME_URL") || envGet("SITE_URL") || "https://lifeintheukatlas.netlify.app").replace(/\/$/, "");
 }

@@ -1,15 +1,23 @@
 [build]
-  publish = "."
-  command = "echo static-and-functions"
+  publish = "dist"
+  command = "node scripts/build.mjs"
   functions = "netlify/functions"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
 [[redirects]]
   from = "/app/*"
   to = "/app/index.html"
   status = 200
+
 [[redirects]]
   from = "/app"
   to = "/app/index.html"
   status = 200
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
