@@ -7,13 +7,8 @@ export default async (req: Request, _context: Context) => {
   }
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Set-Cookie": clearSessionCookie(),
-    },
+    headers: { "Content-Type": "application/json", "Set-Cookie": clearSessionCookie() },
   });
 };
 
-export const config: Config = {
-  path: "/api/auth/logout",
-};
+export const config: Config = { path: "/api/auth/logout" };
