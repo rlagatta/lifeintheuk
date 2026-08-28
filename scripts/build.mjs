@@ -23,9 +23,20 @@ function resolveAppShell() {
   const preferred = join(root, "app", "index.html");
   if (existsSync(preferred)) return { path: preferred, mode: "file" };
 
-  const b64path = join(root, "app", "shell.html.gz.b64");
-  if (existsSync(b64path)) {
-    const b64 = readFileSync(b64path, "utf8").replace(/\s+/g, "");
+  const single = join(root, "app", "shell.html.gz.b64");
+  const part0 = join(root, "app", "shell.part0.b64");
+  let b64 = "";
+  if (existsSync(single)) {
+    b64 = readFileSync(single, "utf8");
+  } else if (existsSync(part0)) {
+    let i = 0;
+    while (existsSync(join(root, "app", `shell.part${i}.b64`))) {
+      b64 += readFileSync(join(root, "app", `shell.part${i}.b64`), "utf8");
+      i++;
+    }
+  }
+  if (b64) {
+    b64 = b64.replace(/\s+/g, "");
     const html = gunzipSync(Buffer.from(b64, "base64")).toString("utf8");
     const out = join(root, "app", "_shell_decoded.html");
     writeFileSync(out, html);
@@ -39,7 +50,7 @@ function resolveAppShell() {
 
 mkdirSync(join(dist, "app"), { recursive: true });
 const shell = resolveAppShell();
-if (!shell) throw new Error("No app shell found: need app/index.html, app/shell.html.gz.b64, or index.html");
+if (!shell) throw new Error("No app shell found");
 cpSync(shell.path, join(dist, "app", "index.html"));
 console.log("app shell from", shell.path, "(" + shell.mode + ")");
 
