@@ -22,6 +22,16 @@ function resolveAppShell() {
   const preferred = join(root, "app", "index.html");
   if (existsSync(preferred)) return preferred;
 
+  const single = join(root, "app", "shell.html.gz.b64");
+  if (existsSync(single)) {
+    const b64 = readFileSync(single, "utf8").replace(/\s+/g, "");
+    const html = gunzipSync(Buffer.from(b64, "base64")).toString("utf8");
+    const out = join(root, "app", "_decoded_index.html");
+    writeFileSync(out, html);
+    console.log("decoded app shell from shell.html.gz.b64");
+    return out;
+  }
+
   const part0 = join(root, "app", "shell.part0.b64");
   if (existsSync(part0)) {
     let b64 = "";
@@ -45,7 +55,7 @@ function resolveAppShell() {
 
 mkdirSync(join(dist, "app"), { recursive: true });
 const shell = resolveAppShell();
-if (!shell) throw new Error("Need app/index.html, app/shell.part*.b64, or index.html");
+if (!shell) throw new Error("Need app/index.html, app/shell.html.gz.b64, or index.html");
 cpSync(shell, join(dist, "app", "index.html"));
 console.log("app shell from", shell);
 
